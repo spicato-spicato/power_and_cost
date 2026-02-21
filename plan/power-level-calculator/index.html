@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Power Level Anvil Cost Calculator</title>
+  <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+  <style>
+    :root {
+      --bg: #1a1a2e;
+      --surface: #16213e;
+      --text: #e8e8e8;
+      --text-muted: #a0a0a0;
+      --accent: #0f3460;
+      --border: #2a2a4a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 0.5rem;
+      font-size: 1.75rem;
+    }
+    .subtitle {
+      text-align: center;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+    }
+    .chart-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .chart-section h2 {
+      margin: 0 0 0.5rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    .chart-section .description {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 1.25rem;
+    }
+    .chart-container {
+      position: relative;
+      height: 280px;
+    }
+    .chart-hint {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+    }
+    code {
+      background: var(--accent);
+      padding: 0.15em 0.4em;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+    .gear-builder-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .gear-builder-row label { display: flex; align-items: center; gap: 0.5rem; }
+    .gear-builder-row select {
+      background: var(--accent);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.35rem 0.5rem;
+      font-size: 0.9rem;
+    }
+    .gear-builder-row button {
+      background: var(--accent);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.35rem 0.75rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .gear-builder-row button:hover { background: #1a3a5c; }
+    .enchant-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .enchant-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.85rem;
+    }
+    .enchant-chip button {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0 0.15rem;
+      font-size: 1rem;
+      line-height: 1;
+    }
+    .enchant-chip button:hover { color: var(--text); }
+    .gear-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 0.5rem 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .gear-stats .stat-row { display: flex; gap: 0.5rem; }
+    .gear-stats .stat-label { color: var(--text-muted); font-size: 0.9rem; }
+    .gear-stats .stat-value { font-weight: 600; }
+    .show-on-charts { margin-top: 0.5rem; }
+    .show-on-charts label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
+    .tweak-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0 1.5rem;
+      margin-bottom: 2rem;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .tweak-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 0;
+      cursor: pointer;
+      user-select: none;
+    }
+    .tweak-section-header h2 { margin: 0; font-size: 1.25rem; font-weight: 600; }
+    .tweak-section-header .chevron {
+      transition: transform 0.2s;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    .tweak-section-header.collapsed .chevron { transform: rotate(-90deg); }
+    .tweak-section-body { padding-bottom: 1.5rem; }
+    .tweak-section-body.collapsed { display: none; }
+    .tweak-group { margin-bottom: 1.25rem; }
+    .tweak-group h3 {
+      margin: 0 0 0.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .tweak-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 0.5rem 1rem;
+    }
+    .tweak-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .tweak-item label {
+      flex: 1;
+      min-width: 0;
+      font-size: 0.9rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .tweak-item input[type="number"] {
+      width: 3.5rem;
+      background: var(--accent);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.25rem 0.35rem;
+      font-size: 0.9rem;
+    }
+    .tweak-enchants {
+      max-height: 280px;
+      overflow-y: auto;
+    }
+    .tweak-reset {
+      margin-top: 1rem;
+      background: var(--accent);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.35rem 0.75rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .tweak-reset:hover { background: #1a3a5c; }
+    .tweak-preset-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+      margin-top: 1rem;
+    }
+    .tweak-preset-row input[type="text"] {
+      width: 12rem;
+      background: var(--accent);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.35rem 0.5rem;
+      font-size: 0.9rem;
+    }
+    .tweak-preset-row input[type="file"] { display: none; }
+    .tweak-save-btn, .tweak-load-btn {
+      background: var(--accent);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.35rem 0.75rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .tweak-save-btn:hover, .tweak-load-btn:hover { background: #1a3a5c; }
+    .gear-table-row { margin-top: 1rem; }
+    .gear-table-row button {
+      background: var(--accent);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.35rem 0.75rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .gear-table-row button:hover { background: #1a3a5c; }
+    #gearTableContainer {
+      margin-top: 1rem;
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    #gearTable {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    #gearTable th, #gearTable td {
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    #gearTable th {
+      background: var(--accent);
+      color: var(--text);
+      font-weight: 600;
+    }
+    #gearTable tbody tr:nth-child(even) { background: rgba(15, 52, 96, 0.2); }
+    #gearTable tbody tr:hover { background: rgba(15, 52, 96, 0.35); }
+    #gearTable tbody tr:last-child td { border-bottom: none; }
+    #gearTable .gear-table-remove {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0.25rem;
+      font-size: 1rem;
+      line-height: 1;
+    }
+    #gearTable .gear-table-remove:hover { color: var(--text); }
+    #gearTable .gear-table-empty {
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 1rem;
+      text-align: center;
+    }
+    @media (max-width: 600px) {
+      body { padding: 1rem; }
+      .chart-container { height: 220px; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Power Level Anvil Cost Calculator</h1>
+  <p class="subtitle">Core power level drives repair effectiveness, enchant cost, and combine cost</p>
+
+  <!-- Tweak Power Values -->
+  <section class="tweak-section" id="tweakSection">
+    <div class="tweak-section-header" id="tweakSectionHeader">
+      <h2>Tweak Power Values</h2>
+      <span class="chevron" id="tweakChevron">▼</span>
+    </div>
+    <div class="tweak-section-body" id="tweakSectionBody">
+      <div class="tweak-group">
+        <h3>Materials</h3>
+        <div id="tweakMaterialsGrid" class="tweak-grid"></div>
+      </div>
+      <div class="tweak-group">
+        <h3>Non-material items</h3>
+        <div id="tweakNonMaterialGrid" class="tweak-grid"></div>
+      </div>
+      <div class="tweak-group">
+        <h3>Enchant cost sigmoid (Branch B & C)</h3>
+        <div class="tweak-grid">
+          <div class="tweak-item">
+            <label for="tweak-enchant-cost-min">Min (floor)</label>
+            <input type="number" id="tweak-enchant-cost-min" data-kind="enchantCostMin" min="1" max="20" value="3">
+          </div>
+          <div class="tweak-item">
+            <label for="tweak-enchant-cost-max">Max (ceiling)</label>
+            <input type="number" id="tweak-enchant-cost-max" data-kind="enchantCostMax" min="20" max="100" value="50">
+          </div>
+          <div class="tweak-item">
+            <label for="tweak-enchant-cost-x0">Midpoint (x0)</label>
+            <input type="number" id="tweak-enchant-cost-x0" data-kind="enchantCostX0" min="50" max="400" value="220">
+          </div>
+          <div class="tweak-item">
+            <label for="tweak-enchant-cost-k">Steepness (k)</label>
+            <input type="number" id="tweak-enchant-cost-k" data-kind="enchantCostK" min="0.01" max="0.1" step="0.005" value="0.025">
+          </div>
+        </div>
+      </div>
+      <div class="tweak-group">
+        <h3>Repair effectiveness (Branch A)</h3>
+        <div class="tweak-grid">
+          <div class="tweak-item">
+            <label for="tweak-repair-min">Min (floor)</label>
+            <input type="number" id="tweak-repair-min" data-kind="repairMin" min="0.1" max="0.5" step="0.01" value="0.25">
+          </div>
+          <div class="tweak-item">
+            <label for="tweak-repair-max">Max (ceiling)</label>
+            <input type="number" id="tweak-repair-max" data-kind="repairMax" min="0.8" max="1.5" step="0.05" value="1.1">
+          </div>
+          <div class="tweak-item">
+            <label for="tweak-repair-x0">Midpoint (x0)</label>
+            <input type="number" id="tweak-repair-x0" data-kind="repairMidpoint" min="50" max="400" value="100">
+          </div>
+          <div class="tweak-item">
+            <label for="tweak-repair-k">Steepness (k)</label>
+            <input type="number" id="tweak-repair-k" data-kind="repairSteepness" min="0.01" max="0.1" step="0.005" value="0.025">
+          </div>
+        </div>
+      </div>
+      <div class="tweak-group">
+        <h3>Enchantments (per level)</h3>
+        <div id="tweakEnchantsGrid" class="tweak-grid tweak-enchants"></div>
+      </div>
+      <div class="tweak-preset-row">
+        <input type="text" id="tweakPresetName" placeholder="Preset name" maxlength="64">
+        <button type="button" class="tweak-save-btn" id="tweakSavePresetBtn">Save preset to file</button>
+        <button type="button" class="tweak-load-btn" id="tweakLoadPresetBtn">Load preset from file</button>
+        <button type="button" class="tweak-save-btn" id="tweakExportModelBtn">Export model values</button>
+        <input type="file" id="tweakPresetFileInput" accept=".json">
+      </div>
+      <button type="button" class="tweak-reset" id="tweakResetBtn">Reset to defaults</button>
+    </div>
+  </section>
+
+  <!-- Gear Builder -->
+  <section class="chart-section" id="gearBuilderSection">
+    <h2>Gear Builder</h2>
+    <p class="description">
+      Build a piece of gear by selecting an item type, material (for tiered items), and adding enchantments. Stats update live. Enchant cost uses a sigmoid: min ~3, max ~50 levels; cost rises through the midpoint and tapers at high power. Enable "Show on charts" to see where your gear falls on each cost curve.
+    </p>
+    <div class="gear-builder-row">
+      <label>Item: <select id="itemTypeSelect"></select></label>
+      <label id="materialLabel">Material: <select id="materialSelect"></select></label>
+      <label>Enchantment: <select id="enchantSelect"></select></label>
+      <label>Level: <select id="enchantLevelSelect"></select></label>
+      <button type="button" id="addEnchantBtn">Add</button>
+    </div>
+    <div id="enchantList" class="enchant-chips"></div>
+    <div id="gearStats" class="gear-stats"></div>
+    <div class="show-on-charts">
+      <label><input type="checkbox" id="showOnCharts"> Show on charts</label>
+    </div>
+    <div class="gear-table-row">
+      <button type="button" id="addToTableBtn">Add to table</button>
+    </div>
+    <div id="gearTableContainer">
+      <table id="gearTable">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Enchantments</th>
+            <th>Total raw</th>
+            <th>Power level</th>
+            <th>Total levels spent</th>
+            <th>Durability/repair</th>
+            <th>Combine cost</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="gearTableBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Core: Raw → Power Level Chart -->
+  <section class="chart-section">
+    <h2>Core: Raw Value → Power Level</h2>
+    <p class="description">
+      <strong>Foundation for all anvil costs.</strong> Raw value = base tier + enchantments. Linear (1:1) identity:
+      <code>powerLevel = rawValue</code>.
+    </p>
+    <div class="chart-container">
+      <canvas id="coreChart"></canvas>
+    </div>
+    <p class="chart-hint">Reference: raw 10→PL 10 | 50→50 | 100→100 | 150→150 | 200→200</p>
+  </section>
+
+  <!-- Branch A: Repair Chart -->
+  <section class="chart-section">
+    <h2>Branch A: Durability Restored per Repair vs. Enchantment Raw</h2>
+    <p class="description">
+      <strong>Formula:</strong> <code>durabilityRestored = (minRepair + (maxRepair - minRepair) / (1 + e^(k × (enchantmentPL - x0)))) × vanillaRepairQuantity</code>. Sigmoid shape: slow decrease at low power, steep drop in the middle, asymptote 0.33 at high power.
+      <strong>enchantmentPL</strong> = enchantmentRaw (identity) — enchantment raw only, excludes base tier. Defaults: minRepair = 0.25, maxRepair = 1.1, x0 = 100, k = 0.025.
+      <strong>Cost per repair:</strong> fixed at 1 material item and 1 XP level (material PL excluded).
+    </p>
+    <div class="chart-container">
+      <canvas id="repairChart"></canvas>
+    </div>
+    <p class="chart-hint">Scroll to zoom • Click and drag to pan</p>
+  </section>
+
+  <!-- Branch B: Enchant Cost Chart -->
+  <section class="chart-section">
+    <h2>Branch B: Enchant Cost vs. Combined Raw Value</h2>
+    <p class="description">
+      Cost in XP levels when adding an enchantment from a book. <strong>Formula:</strong> <code>costInLevels = ceil(minCost + (maxCost - minCost) / (1 + e^(-k × (combinedPL - x0))))</code>. Sigmoid: min ~3, max ~50; cost tapers at high power.
+    </p>
+    <div class="chart-container">
+      <canvas id="enchantChart"></canvas>
+    </div>
+    <p class="chart-hint">Scroll to zoom • Click and drag to pan</p>
+  </section>
+
+  <!-- Branch C: Combine Cost Chart -->
+  <section class="chart-section">
+    <h2>Branch C: Combine Cost vs. Total Raw Value (rawLeft + rawRight)</h2>
+    <p class="description">
+      Cost in XP levels when combining two items (e.g., two swords for durability and enchantments). Uses the same sigmoid as Branch B: <code>combinedRaw = rawLeft + rawRight</code> → <code>costInLevels = ceil(minCost + (maxCost - minCost) / (1 + e^(-k × (combinedPL - x0))))</code>.
+      Durability restored uses Branch A formula based on the left item's enchantment PL.
+    </p>
+    <div class="chart-container">
+      <canvas id="combineChart"></canvas>
+    </div>
+    <p class="chart-hint">Scroll to zoom • Click and drag to pan</p>
+  </section>
+
+  <script>
+    Chart.defaults.color = '#a0a0a0';
+    Chart.defaults.borderColor = '#2a2a4a';
+    Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
+
+    const xRange = Array.from({ length: 501 }, (_, i) => i);
+
+    // Power level: identity — powerLevel = rawValue
+    const powerLevel = raw => Math.max(0, raw);
+    // Branch B: enchant cost sigmoid — min ~3, max ~50, tapers at theoretical limit
+    let enchantCostMin = 3;
+    let enchantCostMax = 50;
+    let enchantCostX0 = 220;
+    let enchantCostK = 0.025;
+    const enchantCostFromPL = pl => Math.ceil(
+      enchantCostMin + (enchantCostMax - enchantCostMin) / (1 + Math.exp(-enchantCostK * (pl - enchantCostX0)))
+    );
+    // Branch C: combine cost — same sigmoid as Branch B (combinedRaw = rawLeft + rawRight)
+    const combineCostFromPL = pl => enchantCostFromPL(pl);
+
+    const labelPositions = ['start', 'center', 'end'];
+    const labelXAdjust = [-8, 0, 8];
+
+    function buildAnnotationPlugin(markers, showPL = false, customLabel = null) {
+      const annotations = {};
+      markers.forEach((m, i) => {
+        const posIdx = i % 3;
+        const pl = powerLevel(m.x);
+        const labelText = customLabel ? customLabel(m) : (showPL ? `${m.label} (${m.x}→PL ${pl})` : `${m.label} (${m.x})`);
+        annotations[`m${i}`] = {
+          type: 'line',
+          xMin: m.x,
+          xMax: m.x,
+          xScaleID: 'x',
+          adjustScaleRange: false,
+          borderColor: 'rgba(255, 255, 255, 0.5)',
+          borderWidth: 1,
+          borderDash: [3, 3],
+          label: {
+            display: true,
+            content: labelText,
+            position: labelPositions[posIdx],
+            xAdjust: labelXAdjust[posIdx],
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            color: '#e8e8e8',
+            font: { size: 9 },
+            padding: 4
+          }
+        };
+      });
+      return { annotation: { annotations } };
+    }
+
+    const zoomPanConfig = {
+      zoom: {
+        wheel: { enabled: true },
+        pinch: { enabled: true },
+        mode: 'xy'
+      },
+      pan: {
+        enabled: true,
+        mode: 'xy'
+      },
+      limits: {
+        x: { min: 0, max: 500 },
+        y: { min: 0 }
+      }
+    };
+
+    // Core: raw → power level (PL = raw, identity)
+    const coreData = xRange.map(raw => powerLevel(raw));
+
+    const coreChart = new Chart(document.getElementById('coreChart'), {
+      type: 'line',
+      data: {
+        labels: xRange,
+        datasets: [{
+          label: 'Power Level',
+          data: coreData,
+          borderColor: '#a78bfa',
+          backgroundColor: 'rgba(167, 139, 250, 0.1)',
+          fill: true,
+          tension: 0,
+          pointRadius: 0,
+          pointHoverRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          zoom: zoomPanConfig,
+          ...buildAnnotationPlugin([], true)
+        },
+        scales: {
+          x: {
+            title: { display: true, text: 'Raw Value (base tier + enchantments)' },
+            min: 0,
+            max: 500,
+            ticks: { maxTicksLimit: 12, maxRotation: 45 }
+          },
+          y: {
+            title: { display: true, text: 'Power Level' },
+            beginAtZero: true,
+            ticks: { maxTicksLimit: 15 }
+          }
+        }
+      }
+    });
+
+    // Branch A Repair: sigmoid. factor = minRepair + (maxRepair - minRepair) / (1 + exp(k * (enchantmentPL - x0)))
+    let repairMin = 0.25;
+    let repairMax = 1.1;
+    let repairMidpoint = 100;
+    let repairSteepness = 0.025;
+    const durabilityRepairFactor = enchantmentPL => repairMin + (repairMax - repairMin) / (1 + Math.exp(repairSteepness * (enchantmentPL - repairMidpoint)));
+    const getRepairEffectivenessData = () => xRange.map(enchantmentRaw => durabilityRepairFactor(powerLevel(enchantmentRaw)));
+
+    const repairChart = new Chart(document.getElementById('repairChart'), {
+      type: 'line',
+      data: {
+        labels: xRange,
+        datasets: [{
+          label: 'Durability restored per repair (× vanilla)',
+          data: getRepairEffectivenessData(),
+          borderColor: '#4ade80',
+          backgroundColor: 'rgba(74, 222, 128, 0.1)',
+          fill: true,
+          tension: 0,
+          pointRadius: 0,
+          pointHoverRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          zoom: zoomPanConfig,
+          ...buildAnnotationPlugin([], false, m => m.label)
+        },
+        scales: {
+          x: {
+            title: { display: true, text: 'Enchantment Raw Value' },
+            min: 0,
+            max: 500,
+            ticks: { maxTicksLimit: 12, maxRotation: 45 }
+          },
+          y: {
+            title: { display: true, text: 'Durability restored (1 = vanilla quantity)' },
+            min: 0.2,
+            max: 1.15,
+            ticks: { maxTicksLimit: 11 }
+          }
+        }
+      }
+    });
+
+    // Branch B: enchant cost sigmoid
+    const getEnchantCostData = () => xRange.map(raw => enchantCostFromPL(powerLevel(raw)));
+
+    const enchantChart = new Chart(document.getElementById('enchantChart'), {
+      type: 'line',
+      data: {
+        labels: xRange,
+        datasets: [{
+          label: 'Enchant cost (XP levels)',
+          data: getEnchantCostData(),
+          borderColor: '#60a5fa',
+          backgroundColor: 'rgba(96, 165, 250, 0.1)',
+          fill: true,
+          tension: 0,
+          pointRadius: 0,
+          pointHoverRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          zoom: zoomPanConfig,
+          ...buildAnnotationPlugin([], true)
+        },
+        scales: {
+          x: {
+            title: { display: true, text: 'Combined Raw Value (existing + new enchant)' },
+            min: 0,
+            max: 500,
+            ticks: { maxTicksLimit: 12, maxRotation: 45 }
+          },
+          y: {
+            title: { display: true, text: 'Cost (XP levels)' },
+            beginAtZero: true,
+            ticks: { stepSize: 5, maxTicksLimit: 15 }
+          }
+        }
+      }
+    });
+
+    // Combine: same sigmoid as Branch B (combinedRaw = rawLeft + rawRight)
+    const getCombineCostData = () => xRange.map(raw => combineCostFromPL(powerLevel(raw)));
+
+    const combineChart = new Chart(document.getElementById('combineChart'), {
+      type: 'line',
+      data: {
+        labels: xRange,
+        datasets: [{
+          label: 'Cost (XP levels)',
+          data: getCombineCostData(),
+          borderColor: '#f472b6',
+          backgroundColor: 'rgba(244, 114, 182, 0.1)',
+          fill: true,
+          tension: 0,
+          pointRadius: 0,
+          pointHoverRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          zoom: zoomPanConfig,
+          ...buildAnnotationPlugin([], true)
+        },
+        scales: {
+          x: {
+            title: { display: true, text: 'Total Raw Value (rawLeft + rawRight)' },
+            min: 0,
+            max: 500,
+            ticks: { maxTicksLimit: 12, maxRotation: 45 }
+          },
+          y: {
+            title: { display: true, text: 'Cost (XP levels)' },
+            beginAtZero: true,
+            ticks: { stepSize: 5, maxTicksLimit: 15 }
+          }
+        }
+      }
+    });
+
+    // --- Gear Builder ---
+    const MATERIALS = { Wood: 10, Stone: 20, Copper: 25, Gold: 30, Iron: 40, Diamond: 70, Netherite: 100 };
+    const TIERED_ITEM_TYPES = ['Sword', 'Axe', 'Pickaxe', 'Shovel', 'Hoe', 'Spear', 'Mace', 'Helmet', 'Chestplate', 'Leggings', 'Boots'];
+    const NON_MATERIAL_ITEMS = {
+      'Bow': 45, 'Crossbow': 40, 'Trident': 45, 'Fishing Rod': 20, 'Shield': 40,
+      'Elytra': 55, 'Shears': 35, 'Carrot on a Stick': 15, 'Warped Fungus on a Stick': 18, 'Book': 0,
+    };
+    const NON_MATERIAL_ITEM_TYPES = Object.keys(NON_MATERIAL_ITEMS);
+    const ALL_ITEM_TYPES = [...TIERED_ITEM_TYPES, ...NON_MATERIAL_ITEM_TYPES];
+    const ARMOR_TYPES = ['Helmet', 'Chestplate', 'Leggings', 'Boots'];
+
+    const ENCHANTMENTS = {
+      'Sharpness': { perLevel: 12, maxLevel: 5, applicableItems: ['Sword', 'Axe', 'Spear', 'Book'] },
+      'Smite': { perLevel: 12, maxLevel: 5, applicableItems: ['Sword', 'Axe', 'Spear', 'Book'] },
+      'Bane of Arthropods': { perLevel: 12, maxLevel: 5, applicableItems: ['Sword', 'Axe', 'Spear', 'Book'] },
+      'Breach': { perLevel: 12, maxLevel: 4, applicableItems: ['Mace', 'Book'] },
+      'Density': { perLevel: 12, maxLevel: 5, applicableItems: ['Mace', 'Book'] },
+      'Power': { perLevel: 12, maxLevel: 5, applicableItems: ['Bow', 'Book'] },
+      'Impaling': { perLevel: 12, maxLevel: 5, applicableItems: ['Trident', 'Book'] },
+      'Efficiency': { perLevel: 8, maxLevel: 5, applicableItems: ['Pickaxe', 'Axe', 'Shovel', 'Hoe', 'Shears', 'Book'] },
+      'Unbreaking': { perLevel: 8, maxLevel: 3, applicableItems: ['All'] },
+      'Knockback': { perLevel: 8, maxLevel: 2, applicableItems: ['Sword', 'Spear', 'Book'] },
+      'Fire Aspect': { perLevel: 8, maxLevel: 2, applicableItems: ['Sword', 'Spear', 'Mace'] },
+      'Looting': { perLevel: 8, maxLevel: 3, applicableItems: ['Sword', 'Spear', 'Book'] },
+      'Sweeping Edge': { perLevel: 8, maxLevel: 3, applicableItems: ['Sword', 'Book'] },
+      'Flame': { perLevel: 8, maxLevel: 1, applicableItems: ['Bow', 'Book'] },
+      'Punch': { perLevel: 8, maxLevel: 2, applicableItems: ['Bow', 'Book'] },
+      'Fortune': { perLevel: 8, maxLevel: 3, applicableItems: ['Pickaxe', 'Axe', 'Shovel', 'Hoe', 'Book'] },
+      'Silk Touch': { perLevel: 8, maxLevel: 1, applicableItems: ['Pickaxe', 'Axe', 'Shovel', 'Hoe', 'Shears', 'Book'] },
+      'Protection': { perLevel: 8, maxLevel: 4, applicableItems: [...ARMOR_TYPES, 'Book'] },
+      'Fire Protection': { perLevel: 8, maxLevel: 4, applicableItems: [...ARMOR_TYPES, 'Book'] },
+      'Blast Protection': { perLevel: 8, maxLevel: 4, applicableItems: [...ARMOR_TYPES, 'Book'] },
+      'Projectile Protection': { perLevel: 8, maxLevel: 4, applicableItems: [...ARMOR_TYPES, 'Book'] },
+      'Feather Falling': { perLevel: 8, maxLevel: 4, applicableItems: ['Boots', 'Book'] },
+      'Depth Strider': { perLevel: 8, maxLevel: 3, applicableItems: ['Boots', 'Book'] },
+      'Frost Walker': { perLevel: 8, maxLevel: 2, applicableItems: ['Boots', 'Book'] },
+      'Respiration': { perLevel: 8, maxLevel: 3, applicableItems: ['Helmet', 'Book'] },
+      'Aqua Affinity': { perLevel: 4, maxLevel: 1, applicableItems: ['Helmet', 'Book'] },
+      'Thorns': { perLevel: 8, maxLevel: 3, applicableItems: [...ARMOR_TYPES, 'Book'] },
+      'Lure': { perLevel: 8, maxLevel: 3, applicableItems: ['Fishing Rod', 'Book'] },
+      'Luck of the Sea': { perLevel: 8, maxLevel: 3, applicableItems: ['Fishing Rod', 'Book'] },
+      'Loyalty': { perLevel: 8, maxLevel: 3, applicableItems: ['Trident', 'Book'] },
+      'Channeling': { perLevel: 4, maxLevel: 1, applicableItems: ['Trident'] },
+      'Riptide': { perLevel: 8, maxLevel: 3, applicableItems: ['Trident', 'Book'] },
+      'Quick Charge': { perLevel: 8, maxLevel: 3, applicableItems: ['Crossbow', 'Book'] },
+      'Piercing': { perLevel: 8, maxLevel: 4, applicableItems: ['Crossbow', 'Book'] },
+      'Multishot': { perLevel: 8, maxLevel: 1, applicableItems: ['Crossbow', 'Book'] },
+      'Lunge': { perLevel: 8, maxLevel: 3, applicableItems: ['Spear', 'Book'] },
+      'Wind Burst': { perLevel: 4, maxLevel: 3, applicableItems: ['Mace', 'Book'] },
+      'Mending': { perLevel: 4, maxLevel: 1, applicableItems: ['All'] },
+      'Infinity': { perLevel: 4, maxLevel: 1, applicableItems: ['Bow', 'Book'] },
+      'Curse of Binding': { perLevel: 4, maxLevel: 1, applicableItems: [...ARMOR_TYPES, 'Elytra', 'Book'] },
+      'Curse of Vanishing': { perLevel: 4, maxLevel: 1, applicableItems: ['All', 'Book'] },
+      'Soul Speed': { perLevel: 4, maxLevel: 3, applicableItems: ['Boots', 'Book'] },
+      'Swift Sneak': { perLevel: 4, maxLevel: 3, applicableItems: ['Leggings', 'Book'] }
+    };
+    const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V'];
+
+    // Default values for reset (deep copies)
+    const DEFAULT_MATERIALS = JSON.parse(JSON.stringify(MATERIALS));
+    const DEFAULT_NON_MATERIAL_ITEMS = JSON.parse(JSON.stringify(NON_MATERIAL_ITEMS));
+    const DEFAULT_ENCHANT_PER_LEVEL = {};
+    Object.keys(ENCHANTMENTS).forEach(name => { DEFAULT_ENCHANT_PER_LEVEL[name] = ENCHANTMENTS[name].perLevel; });
+
+    const TWEAK_STORAGE_KEY = 'powerLevelTweaks';
+    const GEAR_TABLE_STORAGE_KEY = 'powerLevelGearTable';
+
+    let selectedItemType = 'Sword';
+    let selectedMaterial = 'Diamond';
+    let addedEnchants = [];
+    let addSequence = [];
+    let gearTableEntries = [];
+
+    function isTieredItem(itemType) {
+      return TIERED_ITEM_TYPES.includes(itemType);
+    }
+
+    function getBaseRaw() {
+      if (isTieredItem(selectedItemType)) {
+        return MATERIALS[selectedMaterial] || 0;
+      }
+      return NON_MATERIAL_ITEMS[selectedItemType] || 0;
+    }
+
+    function getBaseRawFor(itemType, material) {
+      if (isTieredItem(itemType)) {
+        return MATERIALS[material] || 0;
+      }
+      return NON_MATERIAL_ITEMS[itemType] || 0;
+    }
+
+    function computeTotalLevelsSpentFromSequence(seq, itemType, material) {
+      const baseRaw = getBaseRawFor(itemType, material);
+      let currentEnchantmentRaw = 0;
+      const merged = {};
+      let total = 0;
+      for (const { name, level } of seq) {
+        const newRaw = rawForEnchant(name, level);
+        const combinedRaw = baseRaw + currentEnchantmentRaw + newRaw;
+        total += enchantCostFromPL(powerLevel(combinedRaw));
+        const maxLevel = ENCHANTMENTS[name]?.maxLevel ?? 0;
+        merged[name] = mergeEnchantLevel(merged[name] || 0, level, maxLevel);
+        currentEnchantmentRaw = Object.entries(merged).reduce((s, [n, l]) => s + rawForEnchant(n, l), 0);
+      }
+      return total;
+    }
+
+    function buildCanonicalSequence(enchants) {
+      const seq = [];
+      for (const { name, level } of enchants) {
+        for (let l = 1; l <= level; l++) {
+          seq.push({ name, level: l });
+        }
+      }
+      return seq;
+    }
+
+    function computeTotalLevelsSpentForEntry(entry) {
+      const seq = entry.addSequence && entry.addSequence.length > 0
+        ? entry.addSequence
+        : buildCanonicalSequence(entry.enchants || []);
+      return computeTotalLevelsSpentFromSequence(seq, entry.itemType, entry.material);
+    }
+
+    function computeStatsForEntry(entry) {
+      const baseRaw = getBaseRawFor(entry.itemType, entry.material);
+      const enchantmentRaw = (entry.enchants || []).reduce((s, e) => s + rawForEnchant(e.name, e.level), 0);
+      const totalRaw = baseRaw + enchantmentRaw;
+      const pl = powerLevel(totalRaw);
+      const enchantPL = powerLevel(enchantmentRaw);
+      const durabilityMult = durabilityRepairFactor(enchantPL);
+      const combineCost = combineCostFromPL(powerLevel(totalRaw * 2));
+      return { totalRaw, powerLevel: pl, durabilityMult, combineCost };
+    }
+
+    function enchantAppliesToItem(enchantName) {
+      const e = ENCHANTMENTS[enchantName];
+      if (!e) return false;
+      if (e.applicableItems.includes('All')) return true;
+      return e.applicableItems.includes(selectedItemType);
+    }
+
+    function rawForEnchant(name, level) {
+      const e = ENCHANTMENTS[name];
+      return e ? e.perLevel * level : 0;
+    }
+
+    function mergeEnchantLevel(existingLevel, bookLevel, maxLevel) {
+      if (existingLevel === bookLevel) return Math.min(existingLevel + 1, maxLevel);
+      return Math.max(existingLevel, bookLevel);
+    }
+
+    function updateEnchantLevelOptions() {
+      const sel = document.getElementById('enchantSelect');
+      const levelSel = document.getElementById('enchantLevelSelect');
+      const name = sel.value;
+      levelSel.innerHTML = '';
+      if (!name) return;
+      const enc = ENCHANTMENTS[name];
+      if (!enc) return;
+      const max = enc.maxLevel;
+      for (let i = 1; i <= max; i++) {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = ROMAN[i];
+        levelSel.appendChild(opt);
+      }
+    }
+
+    function computeStats() {
+      const baseRaw = getBaseRaw();
+      const enchantmentRaw = addedEnchants.reduce((s, e) => s + rawForEnchant(e.name, e.level), 0);
+      const totalRaw = baseRaw + enchantmentRaw;
+      const pl = powerLevel(totalRaw);
+      const enchantPL = powerLevel(enchantmentRaw);
+      const durabilityMult = durabilityRepairFactor(enchantPL);
+      const combineCost = combineCostFromPL(powerLevel(totalRaw * 2));
+      const totalLevelsSpent = computeTotalLevelsSpentFromSequence(addSequence, selectedItemType, selectedMaterial);
+      return { totalRaw, powerLevel: pl, enchantmentRaw, durabilityMult, combineCost, totalLevelsSpent };
+    }
+
+    function renderStats() {
+      const el = document.getElementById('gearStats');
+      const s = computeStats();
+      const name = document.getElementById('enchantSelect').value;
+      const level = parseInt(document.getElementById('enchantLevelSelect').value, 10) || 0;
+      let enchantCostText = '—';
+      if (name && level) {
+        const existingRaw = getBaseRaw() + addedEnchants.reduce((sum, e) => sum + rawForEnchant(e.name, e.level), 0);
+        const newEnchantRaw = rawForEnchant(name, level);
+        const combinedRaw = existingRaw + newEnchantRaw;
+        const cost = enchantCostFromPL(powerLevel(combinedRaw));
+        const roman = ROMAN[level] || level;
+        enchantCostText = `${cost} level${cost !== 1 ? 's' : ''} (${name} ${roman})`;
+      }
+      el.innerHTML = `
+        <div class="stat-row"><span class="stat-label">Total raw:</span><span class="stat-value">${s.totalRaw}</span></div>
+        <div class="stat-row"><span class="stat-label">Power level:</span><span class="stat-value">${s.powerLevel}</span></div>
+        <div class="stat-row"><span class="stat-label">Total levels spent:</span><span class="stat-value">${s.totalLevelsSpent} level${s.totalLevelsSpent !== 1 ? 's' : ''}</span></div>
+        <div class="stat-row"><span class="stat-label">Enchantment raw:</span><span class="stat-value">${s.enchantmentRaw}</span></div>
+        <div class="stat-row"><span class="stat-label">Durability per repair:</span><span class="stat-value">${s.durabilityMult.toFixed(2)}× vanilla</span></div>
+        <div class="stat-row"><span class="stat-label">Combine cost (2× same):</span><span class="stat-value">${s.combineCost} levels</span></div>
+        <div class="stat-row"><span class="stat-label">Next enchant cost:</span><span class="stat-value">${enchantCostText}</span></div>
+      `;
+    }
+
+    function renderEnchantList() {
+      const el = document.getElementById('enchantList');
+      el.innerHTML = addedEnchants.map((e, i) =>
+        `<span class="enchant-chip">${e.name} ${ROMAN[e.level]} <button type="button" data-index="${i}" aria-label="Remove">×</button></span>`
+      ).join('');
+      el.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => removeEnchant(parseInt(btn.dataset.index, 10)));
+      });
+      const enchantSel = document.getElementById('enchantSelect');
+      Object.keys(ENCHANTMENTS).forEach(name => {
+        const opt = enchantSel.querySelector(`option[value="${name}"]`);
+        if (opt) opt.disabled = addedEnchants.some(e => e.name === name && e.level >= (ENCHANTMENTS[name]?.maxLevel ?? 0)) || !enchantAppliesToItem(name);
+      });
+    }
+
+    function addEnchant() {
+      const name = document.getElementById('enchantSelect').value;
+      const level = parseInt(document.getElementById('enchantLevelSelect').value, 10);
+      if (!name || !enchantAppliesToItem(name)) return;
+      const existing = addedEnchants.find(e => e.name === name);
+      if (existing) {
+        const maxLevel = ENCHANTMENTS[name]?.maxLevel ?? 0;
+        const mergedLevel = mergeEnchantLevel(existing.level, level, maxLevel);
+        if (mergedLevel === existing.level) return;
+        addSequence.push({ name, level });
+        existing.level = mergedLevel;
+      } else {
+        addSequence.push({ name, level });
+        addedEnchants.push({ name, level });
+      }
+      renderEnchantList();
+      renderStats();
+      updateChartMarkers();
+      // Reset enchant input fields
+      document.getElementById('enchantSelect').value = '';
+      document.getElementById('enchantLevelSelect').innerHTML = '';
+      updateEnchantLevelOptions();
+      renderStats();
+    }
+
+    function removeEnchant(index) {
+      const removedName = addedEnchants[index]?.name;
+      if (removedName) {
+        addSequence = addSequence.filter(a => a.name !== removedName);
+      }
+      addedEnchants.splice(index, 1);
+      renderEnchantList();
+      renderStats();
+      updateChartMarkers();
+    }
+
+    function formatGearItemName() {
+      if (isTieredItem(selectedItemType)) {
+        return `${selectedMaterial} ${selectedItemType}`;
+      }
+      return selectedItemType;
+    }
+
+    function formatEnchantsForTable(enchants) {
+      return enchants.map(e => `${e.name} ${ROMAN[e.level] || e.level}`).join(', ') || '—';
+    }
+
+    function addGearToTable() {
+      const s = computeStats();
+      const entry = {
+        itemType: selectedItemType,
+        material: selectedMaterial,
+        enchants: addedEnchants.map(e => ({ name: e.name, level: e.level })),
+        addSequence: addSequence.map(a => ({ name: a.name, level: a.level })),
+        itemName: formatGearItemName(),
+        enchantStr: formatEnchantsForTable(addedEnchants),
+        totalRaw: s.totalRaw,
+        powerLevel: s.powerLevel,
+        durabilityMult: s.durabilityMult,
+        combineCost: s.combineCost
+      };
+      gearTableEntries.push(entry);
+      renderGearTable();
+      saveGearTableToStorage();
+    }
+
+    function renderGearTable() {
+      const tbody = document.getElementById('gearTableBody');
+      if (gearTableEntries.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="gear-table-empty">No gear added yet</td></tr>';
+        return;
+      }
+      tbody.innerHTML = gearTableEntries.map((entry, i) => {
+        const totalLevelsSpent = computeTotalLevelsSpentForEntry(entry);
+        const stats = computeStatsForEntry(entry);
+        return `<tr>
+          <td>${entry.itemName}</td>
+          <td>${entry.enchantStr}</td>
+          <td>${stats.totalRaw}</td>
+          <td>${stats.powerLevel}</td>
+          <td>${totalLevelsSpent} level${totalLevelsSpent !== 1 ? 's' : ''}</td>
+          <td>${stats.durabilityMult.toFixed(2)}× vanilla</td>
+          <td>${stats.combineCost} levels</td>
+          <td><button type="button" class="gear-table-remove" data-index="${i}" aria-label="Remove">×</button></td>
+        </tr>`;
+      }).join('');
+      tbody.querySelectorAll('.gear-table-remove').forEach(btn => {
+        btn.addEventListener('click', () => {
+          gearTableEntries.splice(parseInt(btn.dataset.index, 10), 1);
+          renderGearTable();
+          saveGearTableToStorage();
+        });
+      });
+    }
+
+    function saveGearTableToStorage() {
+      try {
+        localStorage.setItem(GEAR_TABLE_STORAGE_KEY, JSON.stringify(gearTableEntries));
+      } catch (_) {}
+    }
+
+    function loadGearTableFromStorage() {
+      try {
+        const raw = localStorage.getItem(GEAR_TABLE_STORAGE_KEY);
+        if (!raw) return;
+        gearTableEntries = JSON.parse(raw);
+        renderGearTable();
+      } catch (_) {}
+    }
+
+    function buildUserGearAnnotation(xVal, label) {
+      return {
+        type: 'line',
+        xMin: xVal,
+        xMax: xVal,
+        xScaleID: 'x',
+        adjustScaleRange: false,
+        borderColor: 'rgba(255, 200, 100, 0.9)',
+        borderWidth: 2,
+        borderDash: [],
+        label: {
+          display: true,
+          content: label,
+          position: 'start',
+          xAdjust: -8,
+          backgroundColor: 'rgba(200, 150, 0, 0.9)',
+          color: '#1a1a2e',
+          font: { size: 9 },
+          padding: 4
+        }
+      };
+    }
+
+    function updateChartMarkers() {
+      const show = document.getElementById('showOnCharts').checked;
+      const s = computeStats();
+      const charts = [
+        { chart: coreChart, x: s.totalRaw, label: `Your gear (raw ${s.totalRaw} → PL ${s.powerLevel})` },
+        { chart: repairChart, x: s.enchantmentRaw, label: `Your gear (${s.durabilityMult.toFixed(2)}× vanilla)` },
+        { chart: enchantChart, x: s.totalRaw, label: `Your gear (raw ${s.totalRaw})` },
+        { chart: combineChart, x: s.totalRaw * 2, label: `Your gear (raw ${s.totalRaw * 2}, cost ${s.combineCost})` }
+      ];
+      charts.forEach(({ chart, x, label }) => {
+        const ann = chart.options.plugins?.annotation?.annotations;
+        if (!ann) return;
+        if (show && (s.totalRaw > 0 || s.enchantmentRaw > 0)) {
+          ann.userGear = buildUserGearAnnotation(x, label);
+        } else {
+          delete ann.userGear;
+        }
+        chart.update();
+      });
+    }
+
+    function populateItemTypeSelect() {
+      const sel = document.getElementById('itemTypeSelect');
+      sel.innerHTML = ALL_ITEM_TYPES.map(t => `<option value="${t}" ${t === selectedItemType ? 'selected' : ''}>${t}</option>`).join('');
+    }
+
+    function populateMaterialSelect() {
+      const sel = document.getElementById('materialSelect');
+      sel.innerHTML = Object.keys(MATERIALS)
+        .map(m => `<option value="${m}" ${m === selectedMaterial ? 'selected' : ''}>${m} (${MATERIALS[m]})</option>`).join('');
+    }
+
+    function populateEnchantSelect() {
+      const sel = document.getElementById('enchantSelect');
+      const applicable = Object.keys(ENCHANTMENTS).filter(n => enchantAppliesToItem(n));
+      sel.innerHTML = '<option value="">— Select —</option>' +
+        applicable.map(n => `<option value="${n}">${n}</option>`).join('');
+    }
+
+    function clampRaw(val) {
+      return Math.max(0, parseInt(val, 10) || 0);
+    }
+
+    function populateTweakSection() {
+      const materialsGrid = document.getElementById('tweakMaterialsGrid');
+      const nonMaterialGrid = document.getElementById('tweakNonMaterialGrid');
+      const enchantsGrid = document.getElementById('tweakEnchantsGrid');
+
+      materialsGrid.innerHTML = Object.keys(MATERIALS).map(name =>
+        `<div class="tweak-item"><label for="tweak-mat-${name}">${name}</label><input type="number" id="tweak-mat-${name}" data-kind="material" data-key="${name}" min="0" value="${MATERIALS[name]}"></div>`
+      ).join('');
+
+      nonMaterialGrid.innerHTML = Object.keys(NON_MATERIAL_ITEMS).map(name =>
+        `<div class="tweak-item"><label for="tweak-nm-${name.replace(/ /g, '_')}">${name}</label><input type="number" id="tweak-nm-${name.replace(/ /g, '_')}" data-kind="nonMaterial" data-key="${name}" min="0" value="${NON_MATERIAL_ITEMS[name]}"></div>`
+      ).join('');
+
+      enchantsGrid.innerHTML = Object.keys(ENCHANTMENTS).map(name =>
+        `<div class="tweak-item"><label for="tweak-enc-${name.replace(/ /g, '_')}">${name}</label><input type="number" id="tweak-enc-${name.replace(/ /g, '_')}" data-kind="enchant" data-key="${name}" min="0" value="${ENCHANTMENTS[name].perLevel}"></div>`
+      ).join('');
+
+      materialsGrid.querySelectorAll('input').forEach(inp => {
+        inp.addEventListener('input', onTweakChange);
+        inp.addEventListener('change', onTweakChange);
+      });
+      nonMaterialGrid.querySelectorAll('input').forEach(inp => {
+        inp.addEventListener('input', onTweakChange);
+        inp.addEventListener('change', onTweakChange);
+      });
+      enchantsGrid.querySelectorAll('input').forEach(inp => {
+        inp.addEventListener('input', onTweakChange);
+        inp.addEventListener('change', onTweakChange);
+      });
+
+      ['tweak-enchant-cost-min', 'tweak-enchant-cost-max', 'tweak-enchant-cost-x0', 'tweak-enchant-cost-k',
+       'tweak-repair-min', 'tweak-repair-max', 'tweak-repair-x0', 'tweak-repair-k'].forEach(id => {
+        const inp = document.getElementById(id);
+        if (inp) {
+          inp.addEventListener('input', onTweakChange);
+          inp.addEventListener('change', onTweakChange);
+        }
+      });
+    }
+
+    function onTweakChange(e) {
+      const inp = e.target;
+      const kind = inp.dataset.kind;
+      const key = inp.dataset.key;
+
+      if (kind === 'enchantCostMin') {
+        const val = Math.max(1, Math.min(20, parseInt(inp.value, 10) || 3));
+        inp.value = val;
+        enchantCostMin = val;
+        if (enchantChart?.data?.datasets?.[0]) {
+          enchantChart.data.datasets[0].data = getEnchantCostData();
+          enchantChart.update();
+        }
+        if (combineChart?.data?.datasets?.[0]) {
+          combineChart.data.datasets[0].data = getCombineCostData();
+          combineChart.update();
+        }
+      } else if (kind === 'enchantCostMax') {
+        const val = Math.max(20, Math.min(100, parseInt(inp.value, 10) || 50));
+        inp.value = val;
+        enchantCostMax = val;
+        if (enchantChart?.data?.datasets?.[0]) {
+          enchantChart.data.datasets[0].data = getEnchantCostData();
+          enchantChart.update();
+        }
+        if (combineChart?.data?.datasets?.[0]) {
+          combineChart.data.datasets[0].data = getCombineCostData();
+          combineChart.update();
+        }
+      } else if (kind === 'enchantCostX0') {
+        const val = Math.max(50, Math.min(400, parseInt(inp.value, 10) || 220));
+        inp.value = val;
+        enchantCostX0 = val;
+        if (enchantChart?.data?.datasets?.[0]) {
+          enchantChart.data.datasets[0].data = getEnchantCostData();
+          enchantChart.update();
+        }
+        if (combineChart?.data?.datasets?.[0]) {
+          combineChart.data.datasets[0].data = getCombineCostData();
+          combineChart.update();
+        }
+      } else if (kind === 'enchantCostK') {
+        const val = Math.max(0.01, Math.min(0.1, parseFloat(inp.value) || 0.025));
+        inp.value = val;
+        enchantCostK = val;
+        if (enchantChart?.data?.datasets?.[0]) {
+          enchantChart.data.datasets[0].data = getEnchantCostData();
+          enchantChart.update();
+        }
+        if (combineChart?.data?.datasets?.[0]) {
+          combineChart.data.datasets[0].data = getCombineCostData();
+          combineChart.update();
+        }
+      } else if (kind === 'repairMin') {
+        const val = Math.max(0.1, Math.min(0.5, parseFloat(inp.value) || 0.25));
+        inp.value = val;
+        repairMin = val;
+        if (repairChart?.data?.datasets?.[0]) {
+          repairChart.data.datasets[0].data = getRepairEffectivenessData();
+          repairChart.update();
+        }
+      } else if (kind === 'repairMax') {
+        const val = Math.max(0.8, Math.min(1.5, parseFloat(inp.value) || 1.1));
+        inp.value = val;
+        repairMax = val;
+        if (repairChart?.data?.datasets?.[0]) {
+          repairChart.data.datasets[0].data = getRepairEffectivenessData();
+          repairChart.update();
+        }
+      } else if (kind === 'repairMidpoint') {
+        const val = Math.max(50, Math.min(400, parseInt(inp.value, 10) || 100));
+        inp.value = val;
+        repairMidpoint = val;
+        if (repairChart?.data?.datasets?.[0]) {
+          repairChart.data.datasets[0].data = getRepairEffectivenessData();
+          repairChart.update();
+        }
+      } else if (kind === 'repairSteepness') {
+        const val = Math.max(0.01, Math.min(0.1, parseFloat(inp.value) || 0.025));
+        inp.value = val;
+        repairSteepness = val;
+        if (repairChart?.data?.datasets?.[0]) {
+          repairChart.data.datasets[0].data = getRepairEffectivenessData();
+          repairChart.update();
+        }
+      } else {
+        const val = clampRaw(inp.value);
+        inp.value = val;
+        if (kind === 'material') {
+          MATERIALS[key] = val;
+        } else if (kind === 'nonMaterial') {
+          NON_MATERIAL_ITEMS[key] = val;
+        } else if (kind === 'enchant') {
+          ENCHANTMENTS[key].perLevel = val;
+        }
+      }
+
+      populateMaterialSelect();
+      renderStats();
+      renderGearTable();
+      updateChartMarkers();
+      saveTweakToStorage();
+    }
+
+    function resetTweakToDefaults() {
+      Object.keys(DEFAULT_MATERIALS).forEach(k => { MATERIALS[k] = DEFAULT_MATERIALS[k]; });
+      Object.keys(DEFAULT_NON_MATERIAL_ITEMS).forEach(k => { NON_MATERIAL_ITEMS[k] = DEFAULT_NON_MATERIAL_ITEMS[k]; });
+      Object.keys(DEFAULT_ENCHANT_PER_LEVEL).forEach(k => { ENCHANTMENTS[k].perLevel = DEFAULT_ENCHANT_PER_LEVEL[k]; });
+      enchantCostMin = 3;
+      enchantCostMax = 50;
+      enchantCostX0 = 220;
+      enchantCostK = 0.025;
+      repairMin = 0.25;
+      repairMax = 1.1;
+      repairMidpoint = 100;
+      repairSteepness = 0.025;
+      ['tweak-enchant-cost-min', 'tweak-enchant-cost-max', 'tweak-enchant-cost-x0', 'tweak-enchant-cost-k'].forEach((id, i) => {
+        const inp = document.getElementById(id);
+        if (inp) inp.value = [3, 50, 220, 0.025][i];
+      });
+      ['tweak-repair-min', 'tweak-repair-max', 'tweak-repair-x0', 'tweak-repair-k'].forEach((id, i) => {
+        const inp = document.getElementById(id);
+        if (inp) inp.value = [0.25, 1.1, 100, 0.025][i];
+      });
+      if (repairChart?.data?.datasets?.[0]) {
+        repairChart.data.datasets[0].data = getRepairEffectivenessData();
+        repairChart.update();
+      }
+      populateTweakSection();
+      populateMaterialSelect();
+      renderStats();
+      renderGearTable();
+      updateChartMarkers();
+      localStorage.removeItem(TWEAK_STORAGE_KEY);
+    }
+
+    function getTweakData() {
+      const data = {
+        materials: { ...MATERIALS },
+        nonMaterialItems: { ...NON_MATERIAL_ITEMS },
+        enchantments: {},
+        enchantCostMin,
+        enchantCostMax,
+        enchantCostX0,
+        enchantCostK,
+        repairMin,
+        repairMax,
+        repairMidpoint,
+        repairSteepness
+      };
+      Object.keys(ENCHANTMENTS).forEach(name => {
+        data.enchantments[name] = { perLevel: ENCHANTMENTS[name].perLevel };
+      });
+      return data;
+    }
+
+    function saveTweakToStorage() {
+      localStorage.setItem(TWEAK_STORAGE_KEY, JSON.stringify(getTweakData()));
+    }
+
+    function savePresetToFile() {
+      const nameInput = document.getElementById('tweakPresetName');
+      const name = (nameInput.value || 'preset').trim().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-') || 'preset';
+      const data = { name, ...getTweakData() };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `power-level-preset-${name}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function exportModelValues() {
+      const modelValues = xRange.map(raw => {
+        const pl = powerLevel(raw);
+        return {
+          rawValue: raw,
+          powerLevel: pl,
+          enchantCost: enchantCostFromPL(pl),
+          combineCost: combineCostFromPL(pl),
+          repairEffectiveness: parseFloat(durabilityRepairFactor(pl).toFixed(4))
+        };
+      });
+      const data = {
+        exportedAt: new Date().toISOString(),
+        parameters: getTweakData(),
+        modelValues
+      };
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `power-level-model-export-${timestamp}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function loadPresetFromFile(file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(reader.result);
+          if (data.materials) Object.keys(data.materials).forEach(k => { if (MATERIALS.hasOwnProperty(k)) MATERIALS[k] = clampRaw(data.materials[k]); });
+          if (data.nonMaterialItems) Object.keys(data.nonMaterialItems).forEach(k => { if (NON_MATERIAL_ITEMS.hasOwnProperty(k)) NON_MATERIAL_ITEMS[k] = clampRaw(data.nonMaterialItems[k]); });
+          if (data.enchantments) Object.keys(data.enchantments).forEach(k => { if (ENCHANTMENTS[k]) ENCHANTMENTS[k].perLevel = clampRaw(data.enchantments[k].perLevel); });
+          if (typeof data.enchantCostMin === 'number') enchantCostMin = Math.max(1, Math.min(20, data.enchantCostMin));
+          if (typeof data.enchantCostMax === 'number') enchantCostMax = Math.max(20, Math.min(100, data.enchantCostMax));
+          if (typeof data.enchantCostX0 === 'number') enchantCostX0 = Math.max(50, Math.min(400, data.enchantCostX0));
+          if (typeof data.enchantCostK === 'number') enchantCostK = Math.max(0.01, Math.min(0.1, data.enchantCostK));
+          if (typeof data.repairMin === 'number') repairMin = Math.max(0.1, Math.min(0.5, data.repairMin));
+          if (typeof data.repairMax === 'number') repairMax = Math.max(0.8, Math.min(1.5, data.repairMax));
+          if (typeof data.repairMidpoint === 'number') repairMidpoint = Math.max(50, Math.min(400, data.repairMidpoint));
+          if (typeof data.repairSteepness === 'number') repairSteepness = Math.max(0.01, Math.min(0.1, data.repairSteepness));
+          const minInp = document.getElementById('tweak-enchant-cost-min');
+          const maxInp = document.getElementById('tweak-enchant-cost-max');
+          const x0Inp = document.getElementById('tweak-enchant-cost-x0');
+          const kInp = document.getElementById('tweak-enchant-cost-k');
+          if (minInp) minInp.value = enchantCostMin;
+          if (maxInp) maxInp.value = enchantCostMax;
+          if (x0Inp) x0Inp.value = enchantCostX0;
+          if (kInp) kInp.value = enchantCostK;
+          const rMinInp = document.getElementById('tweak-repair-min');
+          const rMaxInp = document.getElementById('tweak-repair-max');
+          const rX0Inp = document.getElementById('tweak-repair-x0');
+          const rKInp = document.getElementById('tweak-repair-k');
+          if (rMinInp) rMinInp.value = repairMin;
+          if (rMaxInp) rMaxInp.value = repairMax;
+          if (rX0Inp) rX0Inp.value = repairMidpoint;
+          if (rKInp) rKInp.value = repairSteepness;
+          if (repairChart?.data?.datasets?.[0]) {
+            repairChart.data.datasets[0].data = getRepairEffectivenessData();
+            repairChart.update();
+          }
+          populateTweakSection();
+          populateMaterialSelect();
+          renderStats();
+          renderGearTable();
+          updateChartMarkers();
+          saveTweakToStorage();
+        } catch (_) { alert('Invalid preset file.'); }
+      };
+      reader.readAsText(file);
+    }
+
+    function loadTweakFromStorage() {
+      try {
+        const raw = localStorage.getItem(TWEAK_STORAGE_KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        if (data.materials) Object.keys(data.materials).forEach(k => { if (MATERIALS.hasOwnProperty(k)) MATERIALS[k] = clampRaw(data.materials[k]); });
+        if (data.nonMaterialItems) Object.keys(data.nonMaterialItems).forEach(k => { if (NON_MATERIAL_ITEMS.hasOwnProperty(k)) NON_MATERIAL_ITEMS[k] = clampRaw(data.nonMaterialItems[k]); });
+        if (data.enchantments) Object.keys(data.enchantments).forEach(k => { if (ENCHANTMENTS[k]) ENCHANTMENTS[k].perLevel = clampRaw(data.enchantments[k].perLevel); });
+        if (typeof data.enchantCostMin === 'number') enchantCostMin = Math.max(1, Math.min(20, data.enchantCostMin));
+        if (typeof data.enchantCostMax === 'number') enchantCostMax = Math.max(20, Math.min(100, data.enchantCostMax));
+        if (typeof data.enchantCostX0 === 'number') enchantCostX0 = Math.max(50, Math.min(400, data.enchantCostX0));
+        if (typeof data.enchantCostK === 'number') enchantCostK = Math.max(0.01, Math.min(0.1, data.enchantCostK));
+        if (typeof data.repairMin === 'number') repairMin = Math.max(0.1, Math.min(0.5, data.repairMin));
+        if (typeof data.repairMax === 'number') repairMax = Math.max(0.8, Math.min(1.5, data.repairMax));
+        if (typeof data.repairMidpoint === 'number') repairMidpoint = Math.max(50, Math.min(400, data.repairMidpoint));
+        if (typeof data.repairSteepness === 'number') repairSteepness = Math.max(0.01, Math.min(0.1, data.repairSteepness));
+        const minInp = document.getElementById('tweak-enchant-cost-min');
+        const maxInp = document.getElementById('tweak-enchant-cost-max');
+        const x0Inp = document.getElementById('tweak-enchant-cost-x0');
+        const kInp = document.getElementById('tweak-enchant-cost-k');
+        if (minInp) minInp.value = enchantCostMin;
+        if (maxInp) maxInp.value = enchantCostMax;
+        if (x0Inp) x0Inp.value = enchantCostX0;
+        if (kInp) kInp.value = enchantCostK;
+        const rMinInp = document.getElementById('tweak-repair-min');
+        const rMaxInp = document.getElementById('tweak-repair-max');
+        const rX0Inp = document.getElementById('tweak-repair-x0');
+        const rKInp = document.getElementById('tweak-repair-k');
+        if (rMinInp) rMinInp.value = repairMin;
+        if (rMaxInp) rMaxInp.value = repairMax;
+        if (rX0Inp) rX0Inp.value = repairMidpoint;
+        if (rKInp) rKInp.value = repairSteepness;
+        if (repairChart?.data?.datasets?.[0]) {
+          repairChart.data.datasets[0].data = getRepairEffectivenessData();
+          repairChart.update();
+        }
+      } catch (_) {}
+    }
+
+    function updateMaterialVisibility() {
+      const label = document.getElementById('materialLabel');
+      const materialSel = document.getElementById('materialSelect');
+      label.style.display = isTieredItem(selectedItemType) ? '' : 'none';
+      if (isTieredItem(selectedItemType)) {
+        materialSel.disabled = false;
+      }
+    }
+
+    function onItemTypeChange() {
+      selectedItemType = document.getElementById('itemTypeSelect').value;
+      updateMaterialVisibility();
+      if (isTieredItem(selectedItemType)) {
+        populateMaterialSelect();
+      }
+      populateEnchantSelect();
+      updateEnchantLevelOptions();
+      renderStats();
+      renderEnchantList();
+      updateChartMarkers();
+    }
+
+    loadTweakFromStorage();
+    loadGearTableFromStorage();
+    populateTweakSection();
+
+    document.getElementById('tweakSectionHeader').addEventListener('click', () => {
+      const header = document.getElementById('tweakSectionHeader');
+      const body = document.getElementById('tweakSectionBody');
+      header.classList.toggle('collapsed');
+      body.classList.toggle('collapsed');
+    });
+
+    document.getElementById('tweakResetBtn').addEventListener('click', resetTweakToDefaults);
+
+    document.getElementById('tweakSavePresetBtn').addEventListener('click', savePresetToFile);
+
+    document.getElementById('tweakExportModelBtn').addEventListener('click', exportModelValues);
+
+    document.getElementById('tweakLoadPresetBtn').addEventListener('click', () => {
+      document.getElementById('tweakPresetFileInput').click();
+    });
+    document.getElementById('tweakPresetFileInput').addEventListener('change', (e) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        loadPresetFromFile(file);
+        e.target.value = '';
+      }
+    });
+
+    populateItemTypeSelect();
+    populateMaterialSelect();
+    populateEnchantSelect();
+    updateMaterialVisibility();
+    if (isTieredItem(selectedItemType)) {
+      document.getElementById('materialSelect').disabled = true;
+    }
+    updateEnchantLevelOptions();
+
+    document.getElementById('itemTypeSelect').addEventListener('change', onItemTypeChange);
+
+    document.getElementById('materialSelect').addEventListener('change', (e) => {
+      selectedMaterial = e.target.value;
+      e.target.disabled = true;
+      renderStats();
+      updateChartMarkers();
+    });
+
+    document.getElementById('enchantSelect').addEventListener('change', () => {
+      updateEnchantLevelOptions();
+      renderStats();
+    });
+
+    document.getElementById('enchantLevelSelect').addEventListener('change', renderStats);
+
+    document.getElementById('addEnchantBtn').addEventListener('click', addEnchant);
+
+    document.getElementById('addToTableBtn').addEventListener('click', addGearToTable);
+
+    document.getElementById('showOnCharts').addEventListener('change', updateChartMarkers);
+
+    renderStats();
+    renderEnchantList();
+    renderGearTable();
+  </script>
+</body>
+</html>

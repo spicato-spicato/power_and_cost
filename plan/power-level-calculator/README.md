@@ -27,8 +27,8 @@ The calculator is a single HTML file with no build step or server required.
 
 ## What It Shows
 
-- **Enchant Cost** – XP cost when adding enchantments from books (uses power level curve: `PL = round(raw^0.75)`, cost = `ceil(PL/10)`)
-- **Repair Effectiveness** – Durability restored per repair vs. enchantment raw (linear inverse: max(0, 1 - PL/ceiling); cost is flat: 1 material + 1 level)
-- **Combine Cost** – XP cost when combining two items (e.g., two swords)
+- **Enchant Cost** – XP cost when adding enchantments from books (sigmoid: `ceil(minCost + (maxCost - minCost) / (1 + e^(-k × (PL - x0))))`; default min 3, max 50, x0 220, k 0.025)
+- **Repair Effectiveness** – Durability restored per repair vs. enchantment raw (sigmoid curve; cost is flat: 1 material + 1 level)
+- **Combine Cost** – XP cost when combining two items (e.g., two swords); uses the same sigmoid as Enchant Cost based on `combinedRaw = rawLeft + rawRight`. Durability restored uses the Branch A repair formula based on the left item's enchantment PL.
 
-Each chart uses the gradual exponential curve (`raw^0.75`) to compress high raw values and lower costs for high-tier gear.
+Power level equals raw value (linear identity).

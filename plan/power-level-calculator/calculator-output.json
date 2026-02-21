@@ -1,0 +1,163 @@
+{
+  "name": "preset",
+  "materials": {
+    "Wood": 10,
+    "Stone": 20,
+    "Copper": 25,
+    "Gold": 30,
+    "Iron": 40,
+    "Diamond": 70,
+    "Netherite": 100
+  },
+  "nonMaterialItems": {
+    "Bow": 70,
+    "Crossbow": 40,
+    "Trident": 45,
+    "Fishing Rod": 20,
+    "Shield": 40,
+    "Elytra": 55,
+    "Shears": 35,
+    "Carrot on a Stick": 15,
+    "Warped Fungus on a Stick": 18,
+    "Book": 0
+  },
+  "enchantments": {
+    "Sharpness": {
+      "perLevel": 14
+    },
+    "Smite": {
+      "perLevel": 12
+    },
+    "Bane of Arthropods": {
+      "perLevel": 12
+    },
+    "Breach": {
+      "perLevel": 12
+    },
+    "Density": {
+      "perLevel": 12
+    },
+    "Power": {
+      "perLevel": 14
+    },
+    "Impaling": {
+      "perLevel": 12
+    },
+    "Efficiency": {
+      "perLevel": 10
+    },
+    "Unbreaking": {
+      "perLevel": 8
+    },
+    "Knockback": {
+      "perLevel": 4
+    },
+    "Fire Aspect": {
+      "perLevel": 8
+    },
+    "Looting": {
+      "perLevel": 10
+    },
+    "Sweeping Edge": {
+      "perLevel": 8
+    },
+    "Flame": {
+      "perLevel": 8
+    },
+    "Punch": {
+      "perLevel": 8
+    },
+    "Fortune": {
+      "perLevel": 14
+    },
+    "Silk Touch": {
+      "perLevel": 12
+    },
+    "Protection": {
+      "perLevel": 14
+    },
+    "Fire Protection": {
+      "perLevel": 8
+    },
+    "Blast Protection": {
+      "perLevel": 8
+    },
+    "Projectile Protection": {
+      "perLevel": 8
+    },
+    "Feather Falling": {
+      "perLevel": 8
+    },
+    "Depth Strider": {
+      "perLevel": 8
+    },
+    "Frost Walker": {
+      "perLevel": 8
+    },
+    "Respiration": {
+      "perLevel": 8
+    },
+    "Aqua Affinity": {
+      "perLevel": 4
+    },
+    "Thorns": {
+      "perLevel": 8
+    },
+    "Lure": {
+      "perLevel": 8
+    },
+    "Luck of the Sea": {
+      "perLevel": 8
+    },
+    "Loyalty": {
+      "perLevel": 8
+    },
+    "Channeling": {
+      "perLevel": 4
+    },
+    "Riptide": {
+      "perLevel": 8
+    },
+    "Quick Charge": {
+      "perLevel": 8
+    },
+    "Piercing": {
+      "perLevel": 8
+    },
+    "Multishot": {
+      "perLevel": 8
+    },
+    "Lunge": {
+      "perLevel": 8
+    },
+    "Wind Burst": {
+      "perLevel": 4
+    },
+    "Mending": {
+      "perLevel": 4
+    },
+    "Infinity": {
+      "perLevel": 4
+    },
+    "Curse of Binding": {
+      "perLevel": 4
+    },
+    "Curse of Vanishing": {
+      "perLevel": 4
+    },
+    "Soul Speed": {
+      "perLevel": 4
+    },
+    "Swift Sneak": {
+      "perLevel": 4
+    }
+  },
+  "enchantCostMin": 3,
+  "enchantCostMax": 50,
+  "enchantCostX0": 255,
+  "enchantCostK": 0.025,
+  "repairMin": 0.33,
+  "repairMax": 1.1,
+  "repairMidpoint": 55,
+  "repairSteepness": 0.035
+}
