@@ -19,6 +19,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.Objects;
+
 @Mixin(AnvilMenu.class)
 public abstract class AnvilMenuMixin {
 
@@ -29,6 +31,8 @@ public abstract class AnvilMenuMixin {
     @Shadow(remap = false)
     private int field_7776; // repairItemCountCost
 
+    @Unique
+    private static final int RENAME_COST = 1;
     @Unique
     private static final int INPUT_SLOT_LEFT = 0;
     @Unique
@@ -66,9 +70,11 @@ public abstract class AnvilMenuMixin {
 
         int leftEnchant = calc.computeEnchantmentPowerValue(left);
 
+        int renameCost = getRenameCost(left, result);
+
         if (right.isEmpty()) {
             // Rename only
-            field_7770.set(1);
+            field_7770.set(1 + renameCost);
             field_7776 = 0;
             return;
         }
@@ -76,7 +82,7 @@ public abstract class AnvilMenuMixin {
         if (right.is(Items.ENCHANTED_BOOK)) {
             // Enchant (book + item)
             int resultPL = calc.computeMaterialPowerValue(result) + calc.computeEnchantmentPowerValue(result);
-            field_7770.set(formulas.enchantCostFromPL(resultPL));
+            field_7770.set(formulas.enchantCostFromPL(resultPL) + renameCost);
             field_7776 = 0;
             return;
         }
@@ -84,7 +90,7 @@ public abstract class AnvilMenuMixin {
         if (left.getItem() == right.getItem()) {
             // Combine (item + same type item)
             int resultPL = calc.computeMaterialPowerValue(result) + calc.computeEnchantmentPowerValue(result);
-            field_7770.set(formulas.enchantCostFromPL(resultPL));
+            field_7770.set(formulas.enchantCostFromPL(resultPL) + renameCost);
             field_7776 = 0;
             double factor = formulas.durabilityRepairFactor(leftEnchant);
             scaleResultDurability(left, result, factor);
@@ -96,7 +102,7 @@ public abstract class AnvilMenuMixin {
                 .anyMatch(holder -> holder.value() == right.getItem());
         if (isRepairMaterial) {
             // Repair (item + material)
-            field_7770.set(1);
+            field_7770.set(1 + renameCost);
             field_7776 = 1;
             double factor = formulas.durabilityRepairFactor(leftEnchant);
             scaleResultDurability(left, result, factor);
@@ -104,6 +110,12 @@ public abstract class AnvilMenuMixin {
         }
 
         // Fallback: other valid anvil operations - leave vanilla cost/durability
+    }
+
+    @Unique
+    private int getRenameCost(ItemStack left, ItemStack result) {
+        return !Objects.equals(left.getHoverName().getString(), result.getHoverName().getString())
+                ? RENAME_COST : 0;
     }
 
     @Unique
@@ -119,6 +131,11 @@ public abstract class AnvilMenuMixin {
         }
         int ourRestored = (int) Math.round(vanillaRestored * factor);
         int newDamage = leftDamage - ourRestored;
+        int maxDamage = result.getMaxDamage();
+        // Round up to full when repair would leave item at >= 95% durability
+        if (newDamage > 0 && newDamage <= maxDamage * 0.05) {
+            newDamage = 0;
+        }
         result.setDamageValue(Math.max(0, newDamage));
     }
 }

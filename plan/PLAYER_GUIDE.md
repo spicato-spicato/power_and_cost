@@ -1,4 +1,4 @@
-# Gear Maintenance and Modification — Player Guide
+# Power and Cost — Player Guide
 
 A Minecraft Fabric mod that reworks the anvil economy to make enchanting and repairing feel more balanced and predictable.
 
@@ -6,7 +6,7 @@ A Minecraft Fabric mod that reworks the anvil economy to make enchanting and rep
 
 ## Overview
 
-**Gear Maintenance and Modification** changes how the anvil works. Instead of the vanilla system where costs spiral out of control and heavily enchanted items become "Too Expensive," this mod uses a **power level** system. Every item and enchantment has a power value, and those values drive both XP costs and how much durability you get when repairing.
+**Power and Cost** changes how the anvil works. Instead of the vanilla system where costs spiral out of control and heavily enchanted items become "Too Expensive," this mod uses a **power level** system. Every item and enchantment has a power value, and those values drive both XP costs and how much durability you get when repairing.
 
 **What you’ll notice in-game:**
 
