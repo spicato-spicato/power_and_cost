@@ -3,7 +3,7 @@
 	"package": "gear_maintinence_and_modification.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-		"ExampleMixin"
+		"AnvilMenuMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

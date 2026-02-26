@@ -2,8 +2,8 @@
 	"schemaVersion": 1,
 	"id": "gear_maintinence_and_modification",
 	"version": "${version}",
-	"name": "gear_maintinence_and_modification",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"name": "Gear Maintenance and Modification",
+	"description": "Power-level-based anvil economy: material and enchantment power values drive repair durability and enchant/combine costs via sigmoid curves.",
 	"authors": [
 		"Me!"
 	],

@@ -169,3 +169,9 @@ Left sword: 50% durability, Unbreaking 3. Right sword: 100% durability, Sharpnes
 2. **Branch A**: Implement power level → durability repair relationship (inverse; cost fixed at 1 item + 1 level).
 3. **Branch B**: Implement or refine the sigmoid enchantment cost formula.
 4. **Branch C**: Implement or refine the combine cost formula (if part of scope).
+
+
+
+Implementation notes:
+Punishing for players who are combinging many low level enchants to get god tier.
+encouraging players to go for high level enchantments to begin with

@@ -1,0 +1,124 @@
+package gear_maintinence_and_modification.mixin;
+
+import gear_maintinence_and_modification.Gear_maintinence_and_modification;
+import gear_maintinence_and_modification.power.AnvilCostFormulas;
+import gear_maintinence_and_modification.power.PowerLevelCalculator;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.AnvilMenu;
+import net.minecraft.world.inventory.DataSlot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Constant;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+@Mixin(AnvilMenu.class)
+public abstract class AnvilMenuMixin {
+
+    @Shadow(remap = false)
+    @Final
+    private DataSlot field_7770; // cost
+
+    @Shadow(remap = false)
+    private int field_7776; // repairItemCountCost
+
+    @Unique
+    private static final int INPUT_SLOT_LEFT = 0;
+    @Unique
+    private static final int INPUT_SLOT_RIGHT = 1;
+    @Unique
+    private static final int RESULT_SLOT_INDEX = 2;
+
+    /**
+     * Bypasses the vanilla 40-level cost cap. This mod replaces the prior work penalty
+     * with a power-level-based economy, so costs can legitimately exceed 40 levels.
+     */
+    @ModifyConstant(method = "createResult", constant = @Constant(intValue = 40))
+    private int gear_maintenance_raiseCostCap40(int constant) {
+        return Integer.MAX_VALUE;
+    }
+
+    @ModifyConstant(method = "createResult", constant = @Constant(intValue = 39))
+    private int gear_maintenance_raiseCostCap39(int constant) {
+        return Integer.MAX_VALUE - 1;
+    }
+
+    @Inject(method = "createResult", at = @At("TAIL"))
+    private void gear_maintenance_overrideCostAndDurability(CallbackInfo ci) {
+        AbstractContainerMenu self = (AbstractContainerMenu) (Object) this;
+        ItemStack left = self.getSlot(INPUT_SLOT_LEFT).getItem();
+        ItemStack right = self.getSlot(INPUT_SLOT_RIGHT).getItem();
+        ItemStack result = self.getSlot(RESULT_SLOT_INDEX).getItem();
+
+        if (left.isEmpty() || result.isEmpty()) {
+            return;
+        }
+
+        PowerLevelCalculator calc = Gear_maintinence_and_modification.POWER_LEVEL_CALCULATOR;
+        AnvilCostFormulas formulas = new AnvilCostFormulas(Gear_maintinence_and_modification.POWER_LEVEL_CONFIG);
+
+        int leftEnchant = calc.computeEnchantmentPowerValue(left);
+
+        if (right.isEmpty()) {
+            // Rename only
+            field_7770.set(1);
+            field_7776 = 0;
+            return;
+        }
+
+        if (right.is(Items.ENCHANTED_BOOK)) {
+            // Enchant (book + item)
+            int resultPL = calc.computeMaterialPowerValue(result) + calc.computeEnchantmentPowerValue(result);
+            field_7770.set(formulas.enchantCostFromPL(resultPL));
+            field_7776 = 0;
+            return;
+        }
+
+        if (left.getItem() == right.getItem()) {
+            // Combine (item + same type item)
+            int resultPL = calc.computeMaterialPowerValue(result) + calc.computeEnchantmentPowerValue(result);
+            field_7770.set(formulas.enchantCostFromPL(resultPL));
+            field_7776 = 0;
+            double factor = formulas.durabilityRepairFactor(leftEnchant);
+            scaleResultDurability(left, result, factor);
+            return;
+        }
+
+        var repairable = left.get(DataComponents.REPAIRABLE);
+        boolean isRepairMaterial = repairable != null && repairable.items().stream()
+                .anyMatch(holder -> holder.value() == right.getItem());
+        if (isRepairMaterial) {
+            // Repair (item + material)
+            field_7770.set(1);
+            field_7776 = 1;
+            double factor = formulas.durabilityRepairFactor(leftEnchant);
+            scaleResultDurability(left, result, factor);
+            return;
+        }
+
+        // Fallback: other valid anvil operations - leave vanilla cost/durability
+    }
+
+    @Unique
+    private void scaleResultDurability(ItemStack left, ItemStack result, double factor) {
+        if (!left.isDamageableItem() || !result.isDamageableItem()) {
+            return;
+        }
+        int leftDamage = left.getDamageValue();
+        int resultDamage = result.getDamageValue();
+        int vanillaRestored = leftDamage - resultDamage;
+        if (vanillaRestored <= 0) {
+            return;
+        }
+        int ourRestored = (int) Math.round(vanillaRestored * factor);
+        int newDamage = leftDamage - ourRestored;
+        result.setDamageValue(Math.max(0, newDamage));
+    }
+}
