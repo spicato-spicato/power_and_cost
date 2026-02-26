@@ -1,4 +1,4 @@
-package gear_maintinence_and_modification.mixin.client;
+package power_and_cost.mixin.client;
 
 import net.minecraft.client.gui.screens.inventory.AnvilScreen;
 import org.spongepowered.asm.mixin.Mixin;

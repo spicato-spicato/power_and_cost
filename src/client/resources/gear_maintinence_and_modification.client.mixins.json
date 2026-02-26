@@ -1,3 +1,0 @@
-{"required":true,"package":"gear_maintinence_and_modification.mixin.client","compatibilityLevel":"JAVA_21","client":[
-		"AnvilScreenMixin"
-	],"injectors":{"defaultRequire":1}}

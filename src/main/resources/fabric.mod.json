@@ -1,8 +1,8 @@
 {
 	"schemaVersion": 1,
-	"id": "gear_maintinence_and_modification",
+	"id": "power_and_cost",
 	"version": "${version}",
-	"name": "Gear Maintenance and Modification",
+	"name": "Power and Cost",
 	"description": "Power-level-based anvil economy: material and enchantment power values drive repair durability and enchant/combine costs via sigmoid curves.",
 	"authors": [
 		"Me!"
@@ -12,20 +12,20 @@
 		"sources": "https://github.com/FabricMC/fabric-example-mod"
 	},
 	"license": "CC0-1.0",
-	"icon": "assets/gear_maintinence_and_modification/icon.png",
+	"icon": "assets/power_and_cost/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"gear_maintinence_and_modification.Gear_maintinence_and_modification"
+			"power_and_cost.PowerAndCost"
 		],
 		"client": [
-			"gear_maintinence_and_modification.Gear_maintinence_and_modificationClient"
+			"power_and_cost.PowerAndCostClient"
 		]
 	},
 	"mixins": [
-		"gear_maintinence_and_modification.mixins.json",
+		"power_and_cost.mixins.json",
 		{
-			"config": "gear_maintinence_and_modification.client.mixins.json",
+			"config": "power_and_cost.client.mixins.json",
 			"environment": "client"
 		}
 	],

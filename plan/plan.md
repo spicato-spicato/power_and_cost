@@ -1,4 +1,4 @@
-# Gear Maintenance and Modification — Project Plan
+# Power and Cost — Project Plan
 
 ## Project Structure (Tree)
 

@@ -1,13 +1,13 @@
-package gear_maintinence_and_modification;
+package power_and_cost;
 
-import gear_maintinence_and_modification.power.PowerLevelCalculator;
-import gear_maintinence_and_modification.power.PowerLevelConfig;
+import power_and_cost.power.PowerLevelCalculator;
+import power_and_cost.power.PowerLevelConfig;
 import net.fabricmc.api.ModInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Gear_maintinence_and_modification implements ModInitializer {
-	public static final String MOD_ID = "gear_maintinence_and_modification";
+public class PowerAndCost implements ModInitializer {
+	public static final String MOD_ID = "power_and_cost";
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
@@ -16,6 +16,6 @@ public class Gear_maintinence_and_modification implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		LOGGER.info("Gear Maintenance and Modification initialized");
+		LOGGER.info("Power and Cost initialized");
 	}
 }

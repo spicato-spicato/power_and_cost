@@ -1,4 +1,4 @@
-package gear_maintinence_and_modification.power;
+package power_and_cost.power;
 
 /**
  * Sigmoid formulas for anvil cost and repair effectiveness.

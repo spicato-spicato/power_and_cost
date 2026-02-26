@@ -1,4 +1,4 @@
-# Gear Maintenance and Modification
+# Power and Cost
 
 A Minecraft Fabric mod for enchanted gear maintenance and modification cost-power relationships.
 
@@ -23,4 +23,4 @@ The built JAR will be in `build/libs/`.
 
 1. Install [Fabric Loader](https://fabricmc.net/use/) for Minecraft 1.21.10
 2. Install [Fabric API](https://modrinth.com/mod/fabric-api)
-3. Copy the built `gear_maintinence_and_modification-*.jar` from `build/libs/` into your Minecraft `mods` folder
+3. Copy the built `power_and_cost-*.jar` from `build/libs/` into your Minecraft `mods` folder

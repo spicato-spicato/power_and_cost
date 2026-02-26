@@ -1,4 +1,4 @@
-package gear_maintinence_and_modification.power;
+package power_and_cost.power;
 
 import net.minecraft.core.Holder;
 import net.minecraft.world.item.enchantment.Enchantment;

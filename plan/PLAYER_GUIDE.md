@@ -1,0 +1,147 @@
+# Gear Maintenance and Modification — Player Guide
+
+A Minecraft Fabric mod that reworks the anvil economy to make enchanting and repairing feel more balanced and predictable.
+
+---
+
+## Overview
+
+**Gear Maintenance and Modification** changes how the anvil works. Instead of the vanilla system where costs spiral out of control and heavily enchanted items become "Too Expensive," this mod uses a **power level** system. Every item and enchantment has a power value, and those values drive both XP costs and how much durability you get when repairing.
+
+**What you’ll notice in-game:**
+
+- **No more "Too Expensive"** — You can always combine or enchant items, even very powerful ones. Costs cap at a predictable maximum (around 50 levels).
+- **Repair costs stay simple** — Repairing with materials always costs **1 material + 1 XP level**, regardless of tier.
+- **Heavily enchanted gear repairs less** — The more enchantments you have, the less durability each repair restores. Endgame gear is still repairable, but you’ll use more materials.
+- **Early enchants stay cheap** — Adding a few enchantments to a new item costs only a few levels. Costs ramp up as your item gets more powerful.
+
+---
+
+## How It Works
+
+### Power Level
+
+Every item has a **power level** made from two parts:
+
+1. **Material power** — Based on the item’s tier (wood, stone, iron, diamond, netherite, etc.).
+2. **Enchantment power** — Each enchantment adds power based on its type and level.
+
+Higher power means higher XP costs for enchanting/combining, and lower repair effectiveness for durability.
+
+---
+
+## Anvil Operations
+
+### Renaming
+
+Renaming an item costs **1 level**, same as vanilla. No changes.
+
+---
+
+### Repairing (Item + Material)
+
+When you repair an item with its repair material (e.g., iron ingots for iron tools):
+
+| Aspect | Behavior |
+|--------|----------|
+| **XP cost** | Always **1 level** |
+| **Material cost** | Always **1 material** (e.g., 1 iron ingot) |
+| **Durability restored** | Depends on your **enchantments only** — not the material tier |
+
+**Repair effectiveness:**
+
+- **Unenchanted or lightly enchanted** — You get about the same or slightly more durability than vanilla per repair.
+- **Moderately enchanted** — Durability per repair starts to drop.
+- **Heavily enchanted (god-tier gear)** — Each repair restores about one-third of what vanilla would. You can still repair, but you’ll need more materials.
+
+The material tier (wood vs netherite) does **not** affect repair effectiveness. Only enchantments matter.
+
+---
+
+### Enchanting (Item + Enchanted Book)
+
+When you add an enchantment from a book to an item:
+
+| Aspect | Behavior |
+|--------|----------|
+| **XP cost** | Based on the **combined power** of the resulting item (material + all enchantments). |
+| **Cost range** | Roughly **3 levels** (minimum) to **50 levels** (maximum). |
+
+**Cost behavior:**
+
+- **Low-power items** — Adding your first few enchantments costs around 3–5 levels.
+- **Mid-power items** — Costs increase as you add more or stronger enchantments.
+- **High-power items** — Costs approach the cap of about 50 levels. No more "Too Expensive."
+
+---
+
+### Combining (Item + Same Item)
+
+When you combine two items of the same type (e.g., two diamond swords):
+
+| Aspect | Behavior |
+|--------|----------|
+| **XP cost** | Same formula as enchanting — based on the **combined power** of the result. |
+| **Durability restored** | Same logic as repair — based on the **left item’s enchantments**. |
+
+You get both effects in one operation: enchantments from the right item are merged into the left, and durability is transferred from the right to the left, scaled by the repair factor.
+
+---
+
+## Material Power Values (Reference)
+
+Approximate power values by tier:
+
+| Tier | Power |
+|------|-------|
+| Wood / Leather | 10 |
+| Stone / Chainmail | 20 |
+| Copper | 25 |
+| Gold | 30 |
+| Iron | 40 |
+| Diamond | 70 |
+| Netherite | 100 |
+
+**Special items:** Bow (70), Crossbow (40), Trident (45), Elytra (55), Shield (40), Fishing Rod (20), etc.
+
+---
+
+## Enchantment Power (Reference)
+
+Enchantments add power per level. Higher values mean the enchantment contributes more to costs and repair penalties.
+
+| Enchantment | Power per level |
+|-------------|-----------------|
+| Sharpness, Power, Fortune, Protection | 14 |
+| Smite, Bane of Arthropods, Breach, Density, Impaling, Silk Touch | 12 |
+| Efficiency, Looting | 10 |
+| Unbreaking, Fire Aspect, Sweeping Edge, Flame, Punch, and most armor/utility enchants | 8 |
+| Knockback, Aqua Affinity, Channeling, Wind Burst, Mending, Infinity, Curses, Soul Speed, Swift Sneak | 4 |
+
+---
+
+## Design Philosophy
+
+- **Encourages high-level enchants** — Putting strong enchantments on items early is efficient. Costs scale with total power, so building up gradually is more expensive than going for strong enchants from the start.
+- **Discourages "god-tier stacking"** — Combining many low-level enchants into one super-item is costly. The system favors focused, powerful builds.
+- **Repair stays viable** — Heavily enchanted gear never becomes unrepairable. You’ll use more materials, but you can always maintain your gear.
+- **Predictable caps** — XP costs top out around 50 levels. No more hitting an invisible wall at 40.
+
+---
+
+## Compatibility
+
+- **Minecraft:** 1.21.10
+- **Fabric Loader:** ≥ 0.18.4
+- **Fabric API:** Required
+
+---
+
+## Summary
+
+| Operation | XP Cost | Material Cost | Durability Effect |
+|-----------|---------|---------------|-------------------|
+| Rename | 1 level | — | — |
+| Repair | 1 level | 1 material | Scaled by enchantments (less for heavily enchanted) |
+| Enchant (book) | 3–50 levels | — | — |
+| Combine (same item) | 3–50 levels | — | Scaled by left item’s enchantments |

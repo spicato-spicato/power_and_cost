@@ -1,8 +1,8 @@
-package gear_maintinence_and_modification.mixin;
+package power_and_cost.mixin;
 
-import gear_maintinence_and_modification.Gear_maintinence_and_modification;
-import gear_maintinence_and_modification.power.AnvilCostFormulas;
-import gear_maintinence_and_modification.power.PowerLevelCalculator;
+import power_and_cost.PowerAndCost;
+import power_and_cost.power.AnvilCostFormulas;
+import power_and_cost.power.PowerLevelCalculator;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.AnvilMenu;
@@ -61,8 +61,8 @@ public abstract class AnvilMenuMixin {
             return;
         }
 
-        PowerLevelCalculator calc = Gear_maintinence_and_modification.POWER_LEVEL_CALCULATOR;
-        AnvilCostFormulas formulas = new AnvilCostFormulas(Gear_maintinence_and_modification.POWER_LEVEL_CONFIG);
+        PowerLevelCalculator calc = PowerAndCost.POWER_LEVEL_CALCULATOR;
+        AnvilCostFormulas formulas = new AnvilCostFormulas(PowerAndCost.POWER_LEVEL_CONFIG);
 
         int leftEnchant = calc.computeEnchantmentPowerValue(left);
 

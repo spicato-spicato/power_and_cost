@@ -22,7 +22,7 @@ loom {
 	splitEnvironmentSourceSets()
 
 	mods {
-		"gear_maintinence_and_modification" {
+		"power_and_cost" {
 			sourceSet sourceSets.main
 			sourceSet sourceSets.client
 		}

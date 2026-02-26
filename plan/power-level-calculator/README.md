@@ -1,6 +1,6 @@
 # Power Level Anvil Cost Calculator
 
-A standalone web application that visualizes the Power Level cost formulas from the Gear Maintenance and Modification mod's anvil economy system.
+A standalone web application that visualizes the Power Level cost formulas from the Power and Cost mod's anvil economy system.
 
 ## How to Run
 
