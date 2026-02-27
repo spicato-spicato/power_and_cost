@@ -17,6 +17,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Objects;
@@ -54,6 +55,24 @@ public abstract class AnvilMenuMixin {
         return Integer.MAX_VALUE - 1;
     }
 
+    /**
+     * Intercepts vanilla's cost set so we never write 4997 (prior work penalty).
+     * Prevents the cost flash when rapidly changing the name.
+     */
+    @Unique
+    @Redirect(
+        method = "createResult",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/DataSlot;set(I)V")
+    )
+    private void power_and_cost_redirectCostSet(DataSlot slot, int vanillaValue) {
+        if (slot != field_7770) {
+            slot.set(vanillaValue);
+            return;
+        }
+        int ourCost = computeOurCost();
+        slot.set(ourCost);
+    }
+
     @Inject(method = "createResult", at = @At("TAIL"))
     private void gear_maintenance_overrideCostAndDurability(CallbackInfo ci) {
         AbstractContainerMenu self = (AbstractContainerMenu) (Object) this;
@@ -67,30 +86,19 @@ public abstract class AnvilMenuMixin {
 
         PowerLevelCalculator calc = PowerAndCost.POWER_LEVEL_CALCULATOR;
         AnvilCostFormulas formulas = new AnvilCostFormulas(PowerAndCost.POWER_LEVEL_CONFIG);
-
         int leftEnchant = calc.computeEnchantmentPowerValue(left);
 
-        int renameCost = getRenameCost(left, result);
-
         if (right.isEmpty()) {
-            // Rename only
-            field_7770.set(1 + renameCost);
             field_7776 = 0;
             return;
         }
 
         if (right.is(Items.ENCHANTED_BOOK)) {
-            // Enchant (book + item)
-            int resultPL = calc.computeMaterialPowerValue(result) + calc.computeEnchantmentPowerValue(result);
-            field_7770.set(formulas.enchantCostFromPL(resultPL) + renameCost);
             field_7776 = 0;
             return;
         }
 
         if (left.getItem() == right.getItem()) {
-            // Combine (item + same type item)
-            int resultPL = calc.computeMaterialPowerValue(result) + calc.computeEnchantmentPowerValue(result);
-            field_7770.set(formulas.enchantCostFromPL(resultPL) + renameCost);
             field_7776 = 0;
             double factor = formulas.durabilityRepairFactor(leftEnchant);
             scaleResultDurability(left, result, factor);
@@ -101,15 +109,52 @@ public abstract class AnvilMenuMixin {
         boolean isRepairMaterial = repairable != null && repairable.items().stream()
                 .anyMatch(holder -> holder.value() == right.getItem());
         if (isRepairMaterial) {
-            // Repair (item + material)
-            field_7770.set(1 + renameCost);
             field_7776 = 1;
             double factor = formulas.durabilityRepairFactor(leftEnchant);
             scaleResultDurability(left, result, factor);
             return;
         }
 
-        // Fallback: other valid anvil operations - leave vanilla cost/durability
+        // Fallback: repairItemCountCost left at default
+    }
+
+    @Unique
+    private int computeOurCost() {
+        AbstractContainerMenu self = (AbstractContainerMenu) (Object) this;
+        ItemStack left = self.getSlot(INPUT_SLOT_LEFT).getItem();
+        ItemStack right = self.getSlot(INPUT_SLOT_RIGHT).getItem();
+        ItemStack result = self.getSlot(RESULT_SLOT_INDEX).getItem();
+
+        if (left.isEmpty() || result.isEmpty()) {
+            return 0;
+        }
+
+        PowerLevelCalculator calc = PowerAndCost.POWER_LEVEL_CALCULATOR;
+        AnvilCostFormulas formulas = new AnvilCostFormulas(PowerAndCost.POWER_LEVEL_CONFIG);
+        int renameCost = getRenameCost(left, result);
+
+        if (right.isEmpty()) {
+            return 1 + renameCost;
+        }
+
+        if (right.is(Items.ENCHANTED_BOOK)) {
+            int resultPL = calc.computeMaterialPowerValue(result) + calc.computeEnchantmentPowerValue(result);
+            return formulas.enchantCostFromPL(resultPL) + renameCost;
+        }
+
+        if (left.getItem() == right.getItem()) {
+            int resultPL = calc.computeMaterialPowerValue(result) + calc.computeEnchantmentPowerValue(result);
+            return formulas.enchantCostFromPL(resultPL) + renameCost;
+        }
+
+        var repairable = left.get(DataComponents.REPAIRABLE);
+        boolean isRepairMaterial = repairable != null && repairable.items().stream()
+                .anyMatch(holder -> holder.value() == right.getItem());
+        if (isRepairMaterial) {
+            return 1 + renameCost;
+        }
+
+        return 1 + renameCost;
     }
 
     @Unique
