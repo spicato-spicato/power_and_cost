@@ -1,0 +1,22 @@
+{
+	"schemaVersion": 1,
+	"id": "power_and_cost_test",
+	"version": "${version}",
+	"name": "Power and Cost Game Tests",
+	"environment": "*",
+	"entrypoints": {
+		"fabric-gametest": [
+			"power_and_cost.gametest.SameItemRepairDurabilityGameTest",
+			"power_and_cost.gametest.RenameOnlyAnvilCostGameTest",
+			"power_and_cost.gametest.EnchantedBookCombineCostGameTest",
+			"power_and_cost.gametest.CostCapRemovedGameTest",
+			"power_and_cost.gametest.DurabilityRoundingGameTest",
+			"power_and_cost.gametest.EnchantmentPowerLevelGameTest"
+		]
+	},
+	"depends": {
+		"power_and_cost": "*",
+		"fabric-api": "*",
+		"minecraft": "~1.21.10"
+	}
+}
