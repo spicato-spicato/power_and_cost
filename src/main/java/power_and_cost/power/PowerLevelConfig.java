@@ -179,7 +179,7 @@ public final class PowerLevelConfig {
     }
 
     public int getEnchantmentPower(Holder<Enchantment> holder, int level) {
-        String id = holder.unwrapKey().map(k -> k.location().toString()).orElse("");
+        String id = holder.unwrapKey().map(k -> k.identifier().toString()).orElse("");
         int perLevel = enchantmentPowerValues.getOrDefault(id, DEFAULT_UNKNOWN_ENCHANT);
         return perLevel * level;
     }
