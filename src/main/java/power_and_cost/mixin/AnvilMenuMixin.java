@@ -90,11 +90,13 @@ public abstract class AnvilMenuMixin {
 
         if (right.isEmpty()) {
             field_7776 = 0;
+            field_7770.set(computeOurCost());
             return;
         }
 
         if (right.is(Items.ENCHANTED_BOOK)) {
             field_7776 = 0;
+            field_7770.set(computeOurCost());
             return;
         }
 
@@ -134,7 +136,7 @@ public abstract class AnvilMenuMixin {
         int renameCost = getRenameCost(left, result);
 
         if (right.isEmpty()) {
-            return 1 + renameCost;
+            return renameCost;
         }
 
         if (right.is(Items.ENCHANTED_BOOK)) {
