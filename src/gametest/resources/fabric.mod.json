@@ -17,6 +17,6 @@
 	"depends": {
 		"power_and_cost": "*",
 		"fabric-api": "*",
-		"minecraft": "~1.21.10"
+		"minecraft": "~1.21.11"
 	}
 }
