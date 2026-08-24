@@ -1,8 +1,10 @@
 package power_and_cost.power;
 
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 
@@ -47,5 +49,12 @@ public final class PowerLevelCalculator {
      */
     public int computeTotalPowerValue(ItemStack stack) {
         return computeMaterialPowerValue(stack) + computeEnchantmentPowerValue(stack);
+    }
+
+    /**
+     * Power contributed by one offered enchantment (table button or book).
+     */
+    public int computeEnchantmentPower(Holder<Enchantment> holder, int level) {
+        return config.getEnchantmentPower(holder, level);
     }
 }

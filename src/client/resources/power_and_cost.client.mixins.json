@@ -1,1 +1,12 @@
-{"required":true,"package":"power_and_cost.mixin.client","compatibilityLevel":"JAVA_21","client":["AnvilScreenMixin"],"injectors":{"defaultRequire":1}}
+{
+	"required": true,
+	"package": "power_and_cost.mixin.client",
+	"compatibilityLevel": "JAVA_21",
+	"client": [
+		"AnvilScreenMixin",
+		"EnchantmentScreenMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

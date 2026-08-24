@@ -84,7 +84,7 @@ where `vanillaRepairQuantity` is the durability that vanilla Minecraft would res
 ### Mechanic
 
 - **Formula**: `combinedRaw = existingRaw + newEnchantRaw` → `combinedPL = combinedRaw` → `costInLevels = ceil(minCost + (maxCost - minCost) / (1 + e^(-k × (combinedPL - x0))))`
-- Cost uses power level (identity): combined raw equals combined PL. A **sigmoid curve** maps power level to XP cost: low power → ~3 levels (floor), high power → ~50 levels (ceiling). As power approaches the theoretical max, cost tapers off at the ceiling.
+- Cost uses power level (identity): combined raw equals combined PL. A **sigmoid curve** maps power level to XP cost: low power → 1 level (floor), high power → ~50 levels (ceiling). As power approaches the theoretical max, cost tapers off at the ceiling.
 
 ### Power Level → XP Cost Conversion
 
@@ -104,7 +104,7 @@ where `vanillaRepairQuantity` is the durability that vanilla Minecraft would res
 costInLevels = ceil(minCost + (maxCost - minCost) / (1 + e^(-k × (combinedPL - x0))))
 ```
 
-- **Sigmoid shape**: Low-power items cost near `minCost` (e.g., 3 levels). As power increases through the midpoint, cost rises steeply. At high power (approaching theoretical max), the curve tapers toward `maxCost` (e.g., 50 levels).
+- **Sigmoid shape**: Low-power items cost near `minCost` (1 level). As power increases through the midpoint (x0 195), cost rises steeply. At high power (approaching theoretical max), the curve tapers toward `maxCost` (e.g., 50 levels).
 
 ### Details
 
@@ -163,12 +163,37 @@ Left sword: 50% durability, Unbreaking 3. Right sword: 100% durability, Sharpnes
 
 ---
 
+## Branch D: Enchanting Table XP Cost
+
+The enchanting table uses the **same sigmoid as Branch B**. Bookshelves still generate offers. Each button’s XP cost is:
+
+```
+offeredEnchantRaw = sum(perLevel × level) for enchantments that button would apply
+combinedRaw = inputTotalRaw + offeredEnchantRaw
+combinedPL = combinedRaw
+costInLevels = ceil(minCost + (maxCost - minCost) / (1 + e^(-k × (combinedPL - x0))))
+```
+
+| Variable | Definition |
+|----------|------------|
+| `inputTotalRaw` | Material + existing enchantments on the item in the table (unenchanted gear is material only; a book is 0 material) |
+| `offeredEnchantRaw` | Power of that slot’s offered enchantment list |
+| `minCost` / `maxCost` / `x0` / `k` | Same as Branch B (anvil book-apply) |
+
+- Lapis stays vanilla (1 / 2 / 3).
+- Offer generation (`getEnchantmentList`, bookshelf power) is unchanged.
+- Players still need `experienceLevel >= cost` to click (vanilla gate).
+- Anvil formulas are not changed by this branch.
+
+---
+
 ## Implementation Order
 
 1. **Core**: Implement and stabilize the item power level calculation.
 2. **Branch A**: Implement power level → durability repair relationship (inverse; cost fixed at 1 item + 1 level).
 3. **Branch B**: Implement or refine the sigmoid enchantment cost formula.
 4. **Branch C**: Implement or refine the combine cost formula (if part of scope).
+5. **Branch D**: Enchanting-table XP from the same sigmoid (option A: input PL + offered enchant PLs).
 
 
 

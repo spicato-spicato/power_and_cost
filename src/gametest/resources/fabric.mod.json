@@ -11,7 +11,8 @@
 			"power_and_cost.gametest.EnchantedBookCombineCostGameTest",
 			"power_and_cost.gametest.CostCapRemovedGameTest",
 			"power_and_cost.gametest.DurabilityRoundingGameTest",
-			"power_and_cost.gametest.EnchantmentPowerLevelGameTest"
+			"power_and_cost.gametest.EnchantmentPowerLevelGameTest",
+			"power_and_cost.gametest.EnchantingTableCostGameTest"
 		]
 	},
 	"depends": {

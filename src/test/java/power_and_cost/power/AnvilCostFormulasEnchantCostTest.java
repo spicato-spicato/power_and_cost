@@ -7,17 +7,25 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AnvilCostFormulasEnchantCostTest {
-
     private AnvilCostFormulas formulas;
+    private PowerLevelConfig config;
 
     @BeforeEach
     void setUp() {
-        formulas = new AnvilCostFormulas(new PowerLevelConfig());
+        config = new PowerLevelConfig();
+        formulas = new AnvilCostFormulas(config);
     }
 
     @Test
     void plZero_returnsMinimumCost() {
-        assertEquals(4, formulas.enchantCostFromPL(0));
+        assertEquals(1, formulas.enchantCostFromPL(0));
+        assertEquals(config.getEnchantCostMin(), formulas.enchantCostFromPL(0));
+    }
+
+    @Test
+    void costStaysAtFloorUntilAboutPl40() {
+        assertEquals(1, formulas.enchantCostFromPL(39));
+        assertTrue(formulas.enchantCostFromPL(41) >= 2, "Expected cost to rise near PL 40");
     }
 
     @Test
@@ -29,6 +37,8 @@ class AnvilCostFormulasEnchantCostTest {
 
     @Test
     void midpointPl_returnsHalfwayBetweenMinAndMax() {
-        assertEquals(27, formulas.enchantCostFromPL(255));
+        int x0 = config.getEnchantCostX0();
+        int expected = (config.getEnchantCostMin() + config.getEnchantCostMax()) / 2;
+        assertEquals(expected, formulas.enchantCostFromPL(x0));
     }
 }

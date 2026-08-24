@@ -14,7 +14,9 @@ public final class AnvilCostFormulas {
     /**
      * XP level cost for enchant/combine operations.
      * Uses total power value (material + enchantment) of the resulting item.
-     * Formula: ceil(minCost + (maxCost - minCost) / (1 + e^(-k × (totalPL - x0))))
+     * Formula: floor(minCost + (maxCost - minCost) / (1 + e^(-k × (totalPL - x0)))),
+     * clamped to [{@code minCost}, {@code maxCost}]. Floor (not ceil) so the left
+     * asymptote of 1 displays as 1 instead of 2.
      */
     public int enchantCostFromPL(int totalPL) {
         int minCost = config.getEnchantCostMin();
@@ -23,7 +25,8 @@ public final class AnvilCostFormulas {
         double k = config.getEnchantCostK();
         double exp = Math.exp(-k * (totalPL - x0));
         double cost = minCost + (maxCost - minCost) / (1.0 + exp);
-        return (int) Math.ceil(cost);
+        int levels = (int) Math.floor(cost + 1e-9);
+        return Math.max(minCost, Math.min(maxCost, levels));
     }
 
     /**

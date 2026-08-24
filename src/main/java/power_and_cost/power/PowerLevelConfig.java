@@ -19,10 +19,10 @@ public final class PowerLevelConfig {
     // Enchantment per-level power values (registry ID string)
     private final Map<String, Integer> enchantmentPowerValues = new HashMap<>();
 
-    // Enchant cost sigmoid: min 3, max 50, x0 255, k 0.025
-    private int enchantCostMin = 3;
+    // Enchant cost sigmoid: min 1, max 50, x0 195 (shifted -60 from 255), k 0.025
+    private int enchantCostMin = 1;
     private int enchantCostMax = 50;
-    private int enchantCostX0 = 255;
+    private int enchantCostX0 = 195;
     private double enchantCostK = 0.025;
 
     // Repair sigmoid: min 0.33, max 1.1, midpoint 55, steepness 0.035
@@ -180,7 +180,15 @@ public final class PowerLevelConfig {
 
     public int getEnchantmentPower(Holder<Enchantment> holder, int level) {
         String id = holder.unwrapKey().map(k -> k.identifier().toString()).orElse("");
-        int perLevel = enchantmentPowerValues.getOrDefault(id, DEFAULT_UNKNOWN_ENCHANT);
+        return getEnchantmentPower(id, level);
+    }
+
+    /**
+     * Enchantment power from registry ID string ({@code perLevel × level}).
+     * Used by table-offer cost math and unit tests that do not have a Holder.
+     */
+    public int getEnchantmentPower(String enchantmentId, int level) {
+        int perLevel = enchantmentPowerValues.getOrDefault(enchantmentId, DEFAULT_UNKNOWN_ENCHANT);
         return perLevel * level;
     }
 

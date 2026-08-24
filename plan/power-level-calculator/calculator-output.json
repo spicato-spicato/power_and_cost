@@ -152,9 +152,9 @@
       "perLevel": 4
     }
   },
-  "enchantCostMin": 3,
+  "enchantCostMin": 1,
   "enchantCostMax": 50,
-  "enchantCostX0": 255,
+  "enchantCostX0": 195,
   "enchantCostK": 0.025,
   "repairMin": 0.33,
   "repairMax": 1.1,

@@ -1,1 +1,17 @@
-{"required":true,"package":"power_and_cost.mixin","compatibilityLevel":"JAVA_21","mixins":["AnvilMenuMixin"],"injectors":{"defaultRequire":1},"overwrites":{"requireAnnotations":true}}
+{
+	"required": true,
+	"package": "power_and_cost.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": [
+		"AbstractContainerMenuAccess",
+		"AnvilMenuMixin",
+		"EnchantmentMenuMixin",
+		"EnchantmentMenuAccess"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}

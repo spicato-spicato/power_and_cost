@@ -14,6 +14,7 @@ A Minecraft Fabric mod that reworks the anvil economy to make enchanting and rep
 - **Repair costs stay simple** — Repairing with materials always costs **1 material + 1 XP level**, regardless of tier.
 - **Heavily enchanted gear repairs less** — The more enchantments you have, the less durability each repair restores. Endgame gear is still repairable, but you’ll use more materials.
 - **Early enchants stay cheap** — Adding a few enchantments to a new item costs only a few levels. Costs ramp up as your item gets more powerful.
+- **Table XP follows power** — Bookshelves still decide which enchantments appear. The levels you pay scale with the item’s material power plus the power of that button’s offers (same curve as anvil book-apply). Lapis stays 1 / 2 / 3.
 
 ---
 
@@ -26,7 +27,31 @@ Every item has a **power level** made from two parts:
 1. **Material power** — Based on the item’s tier (wood, stone, iron, diamond, netherite, etc.).
 2. **Enchantment power** — Each enchantment adds power based on its type and level.
 
-Higher power means higher XP costs for enchanting/combining, and lower repair effectiveness for durability.
+Higher power means higher XP costs for enchanting/combining (anvil and table), and lower repair effectiveness for durability.
+
+---
+
+## Enchanting Table
+
+The table still works like vanilla for **what** you can roll: bookshelf count, item enchantability, and treasure rules are unchanged. You still need lapis (1, 2, or 3) and enough player levels to click a button.
+
+**What changes:** the XP level cost on each of the three buttons is no longer “bookshelf level 1–30.” It uses the same power-level sigmoid as putting a book on an anvil:
+
+| Aspect | Behavior |
+|--------|----------|
+| **What appears** | Vanilla (bookshelves + item type) |
+| **Lapis** | Vanilla (1 / 2 / 3) |
+| **XP cost** | Combined power of the item **plus** the enchantments that button would apply |
+| **Cost range** | Same as anvil enchanting: about **1 level** (minimum) to **50 levels** (maximum) |
+
+**Cost behavior:**
+
+- **Low-power items** (wood, stone, a regular book) — first rolls stay cheap.
+- **High-material items** (diamond, netherite) — the same roll costs more than on wood, because material power counts.
+- **Stronger rolls** — a button that would apply more or stronger enchantments costs more than a weak roll on the same item.
+- **Books** — a book has no material power, so you mostly pay for the enchantment(s) offered.
+
+You still need enough player levels for that slot’s **vanilla bookshelf power** (the number on the right — a 15-shelf table still unlocks the top row around 30). The **left orb** and the tooltip’s “Enchantment Levels” line are the XP you pay. Lapis stays 1 / 2 / 3. Take the item out and put it back (or wait a moment) after adding shelves so offers refresh. The table does not enchant already-enchanted gear.
 
 ---
 
@@ -65,7 +90,7 @@ When you add an enchantment from a book to an item:
 | Aspect | Behavior |
 |--------|----------|
 | **XP cost** | Based on the **combined power** of the resulting item (material + all enchantments). |
-| **Cost range** | Roughly **3 levels** (minimum) to **50 levels** (maximum). |
+| **Cost range** | Roughly **1 level** (minimum) to **50 levels** (maximum). |
 
 **Cost behavior:**
 
@@ -141,6 +166,7 @@ Enchantments add power per level. Higher values mean the enchantment contributes
 
 | Operation | XP Cost | Material Cost | Durability Effect |
 |-----------|---------|---------------|-------------------|
+| Enchanting table | 3–50 levels (item + offer power) | Lapis 1 / 2 / 3 | — |
 | Rename | 1 level | — | — |
 | Repair | 1 level | 1 material | Scaled by enchantments (less for heavily enchanted) |
 | Enchant (book) | 3–50 levels | — | — |
